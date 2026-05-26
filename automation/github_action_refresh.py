@@ -75,52 +75,46 @@ def springshot_login(email: str, password: str) -> requests.Session:
         log(f"Navigating to {LOGIN_URL} …")
         page.goto(LOGIN_URL, wait_until="networkidle", timeout=30000)
 
-        # ── Fill in credentials ───────────────────────────────────────────────
-        # Try common selectors for email/username and password fields
-        email_selectors = [
-            'input[name="email"]', 'input[type="email"]',
-            'input[name="username"]', 'input[placeholder*="email" i]',
-            'input[placeholder*="user" i]',
-        ]
-        pw_selectors = [
-            'input[name="password"]', 'input[type="password"]',
-            'input[placeholder*="password" i]',
-        ]
-
-        email_field = None
-        for sel in email_selectors:
-            try:
-                page.wait_for_selector(sel, timeout=5000)
-                email_field = sel
-                break
-            except PWTimeout:
-                continue
-
-        if not email_field:
-            log("ERROR: Could not find email/username field on login page.")
+        # ── Fill in credentials — Springshot uses a two-step login ────────────
+        # Step 1: fill username, click NEXT; Step 2: fill password, click SIGN IN
+        username_sel = 'input[name="data[Login][username]"]'
+        try:
+            page.wait_for_selector(username_sel, timeout=10000)
+        except PWTimeout:
+            log("ERROR: Could not find username field on login page.")
             log(f"Page URL: {page.url}")
             log(f"Page title: {page.title()}")
             sys.exit(1)
 
-        pw_field = None
-        for sel in pw_selectors:
-            if page.query_selector(sel):
-                pw_field = sel
-                break
+        log("Filling username and clicking NEXT …")
+        page.fill(username_sel, email)
 
-        if not pw_field:
-            log("ERROR: Could not find password field on login page.")
+        # NEXT button becomes enabled once text is entered
+        try:
+            page.wait_for_selector('button:has-text("NEXT")', timeout=5000)
+            page.click('button:has-text("NEXT")', timeout=5000)
+        except PWTimeout:
+            log("ERROR: Could not find/click NEXT button.")
+            log(f"Page URL: {page.url}")
             sys.exit(1)
 
-        log(f"Filling credentials (email field: {email_field}) …")
-        page.fill(email_field, email)
-        page.fill(pw_field, password)
+        # Step 2: wait for password field, fill it
+        pw_sel = 'input[name="data[Login][password]"]'
+        try:
+            page.wait_for_selector(pw_sel, timeout=10000)
+        except PWTimeout:
+            log("ERROR: Password field did not appear after clicking NEXT.")
+            log(f"Page URL: {page.url}")
+            sys.exit(1)
+
+        log("Filling password …")
+        page.fill(pw_sel, password)
 
         # ── Submit ────────────────────────────────────────────────────────────
         submit_selectors = [
-            'button[type="submit"]', 'input[type="submit"]',
-            'button:has-text("Login")', 'button:has-text("Sign in")',
-            'button:has-text("Log in")',
+            'button:has-text("SIGN IN")', 'button[type="submit"]',
+            'input[type="submit"]', 'button:has-text("Login")',
+            'button:has-text("Sign in")', 'button:has-text("Log in")',
         ]
         submitted = False
         for sel in submit_selectors:
