@@ -17,8 +17,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;margin-bottom:16px;}
 h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
 .chart-wrap{height:260px;position:relative;}
+.tabs{display:flex;gap:8px;margin-bottom:16px;}
+.stab{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;}
+.stab.active{background:rgba(96,165,250,0.15);border-color:#60a5fa;color:#60a5fa;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-thead th{padding:10px 14px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.07);text-align:left;}
+thead th{padding:10px 14px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.07);text-align:left;cursor:pointer;user-select:none;}
+thead th:hover{color:#94a3b8;}
 thead th.r{text-align:right;}
 thead th.c{text-align:center;}
 tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);}
@@ -33,130 +37,350 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 tfoot td.c{text-align:center;color:#94a3b8;}
 .badge{font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;}
 .green{color:#34d399;}
+.bar-wrap{background:rgba(255,255,255,0.05);border-radius:3px;height:6px;margin-top:4px;}
+.bar-fill{background:#60a5fa;border-radius:3px;height:6px;}
 </style>
 </head>
 <body>
 <div class="kpis" id="kpis"></div>
+
 <div class="section-title">Daily Food Cost - May 2026</div>
 <div class="card">
   <h3>Food Cost by Flight (USD)</h3>
   <div class="chart-wrap"><canvas id="chart"></canvas></div>
 </div>
-<div class="section-title">Cost Breakdown by Mission</div>
-<div class="card" style="padding:0;overflow:hidden;">
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Flight</th>
-        <th>Route</th>
-        <th class="r">Food Cost</th>
-        <th class="c">Missions</th>
-        <th class="r">Cost / Mission</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-    <tfoot>
-      <tr>
-        <td colspan="3">Total - May 1 to 10, 2026</td>
-        <td class="r" id="ftotal"></td>
-        <td class="c" id="fmissions"></td>
-        <td class="r" id="favg"></td>
-      </tr>
-    </tfoot>
-  </table>
+
+<div class="section-title">Cost Breakdown by Team Lead</div>
+<div class="tabs">
+  <button class="stab active" onclick="showView('lead')" id="tab-lead">By Team Lead</button>
+  <button class="stab" onclick="showView('date')" id="tab-date">By Date</button>
+  <button class="stab" onclick="showView('flight')" id="tab-flight">By Flight</button>
 </div>
+<div class="card" id="table-card" style="padding:0;overflow:hidden;"></div>
+
 <script>
-var data = [
-  ["2026-05-01","V104","104","ATL-LHR",8549.55,4],
-  ["2026-05-01","V110","110","ATL-MAN",6097.81,4],
-  ["2026-05-02","V104","104","ATL-LHR",7696.54,4],
-  ["2026-05-02","V110","110","ATL-MAN",5747.35,4],
-  ["2026-05-03","V104","104","ATL-LHR",8390.95,4],
-  ["2026-05-03","V110","110","ATL-MAN",6279.28,2],
-  ["2026-05-04","V104","104","ATL-LHR",8300.94,4],
-  ["2026-05-04","V110","110","ATL-MAN",6396.47,4],
-  ["2026-05-05","V104","104","ATL-LHR",7652.39,4],
-  ["2026-05-05","V110","110","ATL-MAN",6132.13,2],
-  ["2026-05-06","V104","104","ATL-LHR",7356.35,4],
-  ["2026-05-06","V110","110","ATL-MAN",5658.77,2],
-  ["2026-05-07","V104","104","ATL-LHR",7721.96,4],
-  ["2026-05-07","V110","110","ATL-MAN",5991.99,4],
-  ["2026-05-08","V104","104","ATL-LHR",8131.25,4],
-  ["2026-05-08","V110","110","ATL-MAN",6033.51,4],
-  ["2026-05-09","V104","104","ATL-LHR",8219.44,4],
-  ["2026-05-09","V110","110","ATL-MAN",6430.59,4],
-  ["2026-05-10","V104","104","ATL-LHR",8233.10,4],
-  ["2026-05-10","V110","110","ATL-MAN",6047.14,4]
+// Food cost data from Excel (date, flight_num, route, total_cost)
+var fc = [
+  ["2026-05-01","104","ATL-LHR",8549.55],["2026-05-01","110","ATL-MAN",6097.81],
+  ["2026-05-02","104","ATL-LHR",7696.54],["2026-05-02","110","ATL-MAN",5747.35],
+  ["2026-05-03","104","ATL-LHR",8390.95],["2026-05-03","110","ATL-MAN",6279.28],
+  ["2026-05-04","104","ATL-LHR",8300.94],["2026-05-04","110","ATL-MAN",6396.47],
+  ["2026-05-05","104","ATL-LHR",7652.39],["2026-05-05","110","ATL-MAN",6132.13],
+  ["2026-05-06","104","ATL-LHR",7356.35],["2026-05-06","110","ATL-MAN",5658.77],
+  ["2026-05-07","104","ATL-LHR",7721.96],["2026-05-07","110","ATL-MAN",5991.99],
+  ["2026-05-08","104","ATL-LHR",8131.25],["2026-05-08","110","ATL-MAN",6033.51],
+  ["2026-05-09","104","ATL-LHR",8219.44],["2026-05-09","110","ATL-MAN",6430.59],
+  ["2026-05-10","104","ATL-LHR",8233.10],["2026-05-10","110","ATL-MAN",6047.14]
 ];
 
-function fmt(n) {
-  return "$" + n.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-function fdate(s) {
-  return new Date(s + "T12:00:00").toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
-}
+// Mission data from dashboard CSV (date, outbound, lead, missions_completed)
+var md = [
+  ["2026-05-05","110","Christian Lawson",2],
+  ["2026-05-05","104","Claudette St. Juste",2],
+  ["2026-05-05","104","Abubakarr Sessay",2],
+  ["2026-05-04","110","Bobbie Jackson III",2],
+  ["2026-05-04","110","Issa Camara",2],
+  ["2026-05-04","104","Claudette St. Juste",2],
+  ["2026-05-04","104","Abubakarr Sessay",2],
+  ["2026-05-03","104","Bobbie Jackson III",2],
+  ["2026-05-03","104","Claudette St. Juste",2],
+  ["2026-05-03","110","Gabriel Silva Mane",2],
+  ["2026-05-02","110","Bobbie Jackson III",2],
+  ["2026-05-02","110","Maurice Smith",2],
+  ["2026-05-02","104","Abubakarr Sessay",2],
+  ["2026-05-02","104","Christian Lawson",2],
+  ["2026-05-01","110","Maurice Smith",2],
+  ["2026-05-01","110","Christian Lawson",2],
+  ["2026-05-01","104","Bobbie Jackson III",2],
+  ["2026-05-01","104","Gabriel Silva Mane",2],
+  ["2026-04-30","110","Bobbie Jackson III",2],
+  ["2026-04-30","110","Christian Lawson",2],
+  ["2026-04-30","104","Abdou Diakhate",2],
+  ["2026-04-30","104","Claudette St. Juste",2],
+  ["2026-04-29","110","Abdou Diakhate",2],
+  ["2026-04-29","104","Abubakarr Sessay",2],
+  ["2026-04-29","104","Claudette St. Juste",2],
+  ["2026-04-28","110","Claudette St. Juste",2],
+  ["2026-04-28","110","Christian Lawson",2],
+  ["2026-04-28","104","Tecari Brown",2],
+  ["2026-04-28","104","Abubakarr Sessay",2],
+  ["2026-04-27","110","Rachel Lester",2],
+  ["2026-04-27","110","Bobbie Jackson III",2],
+  ["2026-04-27","104","Maurice Smith",2],
+  ["2026-04-27","104","Abubakarr Sessay",2],
+  ["2026-04-26","110","Bobbie Jackson III",2],
+  ["2026-04-26","104","Claudette St. Juste",2],
+  ["2026-04-25","110","Bobbie Jackson III",2],
+  ["2026-04-25","104","Bobbie Jackson III",2],
+  ["2026-04-25","110","Christian Lawson",2],
+  ["2026-04-25","104","Claudette St. Juste",2],
+  ["2026-04-24","104","Claudette St. Juste",2],
+  ["2026-04-24","110","Bobbie Jackson III",2],
+  ["2026-04-24","104","Bobbie Jackson III",2],
+  ["2026-04-24","110","Christian Lawson",2],
+  ["2026-04-23","110","Tecari Brown",2],
+  ["2026-04-23","110","Christian Lawson",2],
+  ["2026-04-23","104","Abdou Diakhate",2],
+  ["2026-04-23","104","Claudette St. Juste",2],
+  ["2026-04-22","104","Claudette St. Juste",2],
+  ["2026-04-22","110","Tecari Brown",2],
+  ["2026-04-21","110","Tecari Brown",2],
+  ["2026-04-21","104","Claudette St. Juste",2],
+  ["2026-04-21","104","Abubakarr Sessay",2],
+  ["2026-04-20","110","Abubakarr Sessay",2],
+  ["2026-04-20","110","Rachel Lester",2],
+  ["2026-04-20","104","Claudette St. Juste",2],
+  ["2026-04-20","104","Abubakarr Sessay",2],
+  ["2026-04-19","110","Claudette St. Juste",2],
+  ["2026-04-19","104","Bobbie Jackson III",2],
+  ["2026-04-19","110","Christian Lawson",2],
+  ["2026-04-18","110","Abubakarr Sessay",2],
+  ["2026-04-18","104","Bobbie Jackson III",2],
+  ["2026-04-18","104","Abubakarr Sessay",2],
+  ["2026-04-17","110","Bobbie Jackson III",1],
+  ["2026-04-17","104","Bobbie Jackson III",1],
+  ["2026-04-17","110","Abubakarr Sessay",1],
+  ["2026-04-17","104","Abubakarr Sessay",1],
+  ["2026-04-16","110","Abdou Diakhate",1],
+  ["2026-04-16","110","Christian Lawson",1],
+  ["2026-04-16","104","Issa Camara",1],
+  ["2026-04-16","104","Bobbie Jackson III",1],
+  ["2026-04-15","110","Jeremy Allen",1],
+  ["2026-04-15","104","Christian Lawson",1],
+  ["2026-04-15","104","Maurice Smith",1],
+  ["2026-04-15","110","Tecari Brown",1],
+  ["2026-04-14","110","Christian Lawson",1],
+  ["2026-04-14","104","Tecari Brown",1],
+  ["2026-04-14","104","Abubakarr Sessay",1],
+  ["2026-04-13","110","Rachel Lester",1],
+  ["2026-04-13","110","Abubakarr Sessay",1],
+  ["2026-04-13","104","Maurice Smith",1],
+  ["2026-04-13","104","Bobbie Jackson III",1],
+  ["2026-04-12","104","Bobbie Jackson III",1],
+  ["2026-04-12","110","Rachel Lester",1],
+  ["2026-04-11","110","Gabriel Silva Mane",1],
+  ["2026-04-11","110","Bobbie Jackson III",1],
+  ["2026-04-11","104","Tecari Brown",1],
+  ["2026-04-11","104","Bobbie Jackson III",1],
+  ["2026-04-10","104","Gabriel Silva Mane",1],
+  ["2026-04-10","110","Maurice Smith",1],
+  ["2026-04-10","110","Bobbie Jackson III",1],
+  ["2026-04-10","104","Rachel Lester",1],
+  ["2026-04-09","110","Tecari Brown",1],
+  ["2026-04-09","110","Claudette St. Juste",1],
+  ["2026-04-09","104","Abdou Diakhate",1],
+  ["2026-04-09","104","Bobbie Jackson III",1],
+  ["2026-04-08","104","Abdou Diakhate",1],
+  ["2026-04-08","110","Tecari Brown",1],
+  ["2026-04-07","110","Christian Lawson",1],
+  ["2026-04-07","104","Claudette St. Juste",1],
+  ["2026-04-06","110","Rachel Lester",1],
+  ["2026-04-06","104","Issa Camara",1],
+  ["2026-05-17","110","Bobbie Jackson III",1],
+  ["2026-05-17","110","Claudette St. Juste",1],
+  ["2026-05-16","110","Christian Lawson",1],
+  ["2026-05-16","104","Bobbie Jackson III",1],
+  ["2026-05-15","110","Maurice Smith",1],
+  ["2026-05-15","110","Bobbie Jackson III",1],
+  ["2026-05-15","104","Christian Lawson",1],
+  ["2026-05-14","110","Tecari Brown",1],
+  ["2026-05-14","110","Bobbie Jackson III",1],
+  ["2026-05-14","104","Christian Lawson",1],
+  ["2026-05-14","104","Abdou Diakhate",1],
+  ["2026-05-13","104","Bobbie Jackson III",1],
+  ["2026-05-13","110","Claudette St. Juste",1],
+  ["2026-05-13","110","Abdou Diakhate",1],
+  ["2026-05-12","110","Bobbie Jackson III",1],
+  ["2026-05-12","104","Abubakarr Sessay",1],
+  ["2026-05-11","110","Bobbie Jackson III",1],
+  ["2026-05-11","110","Christian Lawson",1],
+  ["2026-05-11","104","Claudette St. Juste",1],
+  ["2026-05-11","104","Abubakarr Sessay",1],
+  ["2026-05-10","104","Gabriel Silva Mane",1],
+  ["2026-05-10","104","Rachel Lester",1],
+  ["2026-05-10","110","Claudette St. Juste",1],
+  ["2026-05-10","110","Maurice Smith",1],
+  ["2026-05-09","110","Christian Lawson",1],
+  ["2026-05-09","110","Bobbie Jackson III",1],
+  ["2026-05-09","104","Maurice Smith",1],
+  ["2026-05-09","104","Gabriel Silva Mane",1],
+  ["2026-05-08","110","Christian Lawson",1],
+  ["2026-05-08","110","Bobbie Jackson III",1],
+  ["2026-05-08","104","Gabriel Silva Mane",1],
+  ["2026-05-08","104","Maurice Smith",1],
+  ["2026-05-07","110","Bobbie Jackson III",1],
+  ["2026-05-07","104","Christian Lawson",1],
+  ["2026-05-07","110","Abdou Diakhate",1],
+  ["2026-05-07","104","Abdou Diakhate",1],
+  ["2026-05-06","104","Christian Lawson",1],
+  ["2026-05-06","104","Tecari Brown",1],
+  ["2026-05-06","110","Claudette St. Juste",1],
+  ["2026-05-06","110","Abdou Diakhate",1],
+  ["2026-05-20","110","Bobbie Jackson III",1],
+  ["2026-05-20","110","Claudette St. Juste",1],
+  ["2026-05-20","104","Abdou Diakhate",1],
+  ["2026-05-19","110","Christian Lawson",1],
+  ["2026-05-19","104","Claudette St. Juste",1],
+  ["2026-05-19","104","Tecari Brown",1],
+  ["2026-05-18","110","Claudette St. Juste",1],
+  ["2026-05-18","110","Abubakarr Sessay",1],
+  ["2026-05-18","104","Bobbie Jackson III",1],
+  ["2026-05-21","104","Bobbie Jackson III",1],
+  ["2026-05-21","110","Abdou Diakhate",1],
+  ["2026-05-21","104","Tecari Brown",1],
+  ["2026-05-21","110","Christian Lawson",1],
+  ["2026-05-25","110","Bobbie Jackson III",1],
+  ["2026-05-25","110","Abubakarr Sessay",1],
+  ["2026-05-25","104","Abubakarr Sessay",1],
+  ["2026-05-24","110","Bobbie Jackson III",1],
+  ["2026-05-24","110","Claudette St. Juste",1],
+  ["2026-05-23","110","Maurice Smith",1],
+  ["2026-05-23","110","Christian Lawson",1],
+  ["2026-05-23","104","Tecari Brown",1],
+  ["2026-05-23","104","Gabriel Silva Mane",1],
+  ["2026-05-22","110","Christian Lawson",1],
+  ["2026-05-22","110","Bobbie Jackson III",1],
+  ["2026-05-22","104","Bobbie Jackson III",1],
+  ["2026-05-22","104","Gabriel Silva Mane",1],
+  ["2026-05-26","110","Christian Lawson",1],
+  ["2026-05-26","104","Tecari Brown",1],
+  ["2026-05-26","104","Abubakarr Sessay",1],
+  ["2026-05-27","104","Tecari Brown",1],
+  ["2026-05-27","110","Claudette St. Juste",1],
+  ["2026-05-28","110","Maurice Smith",1],
+  ["2026-05-28","110","Christian Lawson",1],
+  ["2026-05-28","104","Tecari Brown",1],
+  ["2026-05-28","104","Bobbie Jackson III",1],
+  ["2026-05-29","110","Christian Lawson",1],
+  ["2026-05-29","104","Gabriel Silva Mane",1],
+  ["2026-05-29","104","Maurice Smith",1],
+  ["2026-05-30","110","Bobbie Jackson III",1]
+];
 
-var gt=0, t104=0, t110=0, tm=0;
-var chartDates={}, tbody=document.getElementById("tbody"), rows="";
+function fmt(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fdate(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
 
-data.forEach(function(row) {
-  var date=row[0], vfn=row[1], outbound=row[2], route=row[3], cost=row[4], missions=row[5];
-  var cpm = fmt(cost / missions);
-  gt += cost;
-  if (outbound === "104") t104 += cost; else t110 += cost;
-  tm += missions;
-  if (!chartDates[date]) chartDates[date] = {v104:0, v110:0};
-  if (outbound === "104") chartDates[date].v104 = cost; else chartDates[date].v110 = cost;
+// Build cost-per-mission lookup: {date+outbound -> cost_per_mission}
+var fcMap = {};
+fc.forEach(function(r){ fcMap[r[0]+"|"+r[1]] = {cost:r[3], route:r[2]}; });
 
-  rows += "<tr>";
-  rows += "<td>" + fdate(date) + "</td>";
-  rows += "<td><span class='badge'>" + vfn + "</span></td>";
-  rows += "<td class='m'>" + route + "</td>";
-  rows += "<td class='r'>" + fmt(cost) + "</td>";
-  rows += "<td class='c'>" + missions + "</td>";
-  rows += "<td class='r green'>" + cpm + "</td>";
-  rows += "</tr>";
+// Total missions per date+outbound
+var totalMissionsMap = {};
+md.forEach(function(r){
+  var k = r[0]+"|"+r[1];
+  totalMissionsMap[k] = (totalMissionsMap[k]||0) + r[3];
 });
 
-tbody.innerHTML = rows;
-document.getElementById("ftotal").textContent = fmt(gt);
-document.getElementById("fmissions").textContent = tm;
-document.getElementById("favg").textContent = fmt(gt / tm);
+// Build enriched rows: each lead entry + their share of food cost
+var enriched = md.map(function(r){
+  var k = r[0]+"|"+r[1];
+  var fc_entry = fcMap[k] || {cost:0, route:"?"};
+  var totalM = totalMissionsMap[k] || 1;
+  var cpm = fc_entry.cost / totalM;
+  return {
+    date: r[0], outbound: r[1], flight: "V"+r[1], route: fc_entry.route,
+    lead: r[2], missions: r[3],
+    totalCost: fc_entry.cost, cpm: cpm,
+    leadCost: cpm * r[3]
+  };
+});
+
+// KPI totals
+var grandCost=0, grandMissions=0, leads={};
+enriched.forEach(function(r){
+  grandCost += r.leadCost;
+  grandMissions += r.missions;
+  if(!leads[r.lead]) leads[r.lead] = {missions:0, cost:0};
+  leads[r.lead].missions += r.missions;
+  leads[r.lead].cost += r.leadCost;
+});
+var topLead = Object.keys(leads).sort(function(a,b){return leads[b].missions-leads[a].missions;})[0];
 
 document.getElementById("kpis").innerHTML =
-  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>" + fmt(gt) + "</div><div class='delta'>May 1-10, 2026</div></div>" +
-  "<div class='kpi'><div class='label'>V104 ATL-LHR</div><div class='value'>" + fmt(t104) + "</div><div class='delta'>10 departures</div></div>" +
-  "<div class='kpi'><div class='label'>V110 ATL-MAN</div><div class='value'>" + fmt(t110) + "</div><div class='delta'>10 departures</div></div>" +
-  "<div class='kpi'><div class='label'>Avg Cost per Mission</div><div class='value'>" + fmt(gt/tm) + "</div><div class='delta'>" + tm + " missions</div></div>";
+  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(grandCost)+"</div><div class='delta'>May 1-10 - V104 + V110</div></div>"+
+  "<div class='kpi'><div class='label'>Total Missions</div><div class='value'>"+grandMissions+"</div><div class='delta'>Outbound 104 and 110</div></div>"+
+  "<div class='kpi'><div class='label'>Avg Cost per Mission</div><div class='value'>"+fmt(grandCost/grandMissions)+"</div><div class='delta'>across all leads</div></div>"+
+  "<div class='kpi'><div class='label'>Top Lead by Volume</div><div class='value'>"+topLead.split(" ")[0]+"</div><div class='delta'>"+leads[topLead].missions+" missions</div></div>";
 
-var dates = Object.keys(chartDates).sort();
-var labels = dates.map(function(d) { return fdate(d).replace(", 2026",""); });
-var v104data = dates.map(function(d) { return chartDates[d].v104; });
-var v110data = dates.map(function(d) { return chartDates[d].v110; });
-
-new Chart(document.getElementById("chart"), {
-  type: "bar",
-  data: {
-    labels: labels,
-    datasets: [
-      {label: "V104 ATL-LHR", data: v104data, backgroundColor: "rgba(96,165,250,0.75)", borderRadius: 4},
-      {label: "V110 ATL-MAN", data: v110data, backgroundColor: "rgba(52,211,153,0.75)", borderRadius: 4}
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {labels: {color: "#94a3b8"}},
-      tooltip: {callbacks: {label: function(c) { return c.dataset.label + ": " + fmt(c.raw); }}}
-    },
-    scales: {
-      x: {ticks: {color: "#64748b"}, grid: {color: "rgba(255,255,255,0.05)"}},
-      y: {ticks: {color: "#64748b", callback: function(v) { return "$" + v.toLocaleString(); }}, grid: {color: "rgba(255,255,255,0.05)"}}
-    }
-  }
+// Chart
+var chartDates={};
+fc.forEach(function(r){
+  if(!chartDates[r[0]]) chartDates[r[0]]={v104:0,v110:0};
+  if(r[1]==="104") chartDates[r[0]].v104=r[3]; else chartDates[r[0]].v110=r[3];
 });
+var dates=Object.keys(chartDates).sort();
+new Chart(document.getElementById("chart"),{type:"bar",data:{labels:dates.map(function(d){return fdate(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:dates.map(function(d){return chartDates[d].v104;}),backgroundColor:"rgba(96,165,250,0.75)",borderRadius:4},{label:"V110 ATL-MAN",data:dates.map(function(d){return chartDates[d].v110;}),backgroundColor:"rgba(52,211,153,0.75)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
+
+var currentView = "lead";
+function showView(v){
+  currentView = v;
+  ["lead","date","flight"].forEach(function(t){
+    document.getElementById("tab-"+t).className = "stab"+(t===v?" active":"");
+  });
+  renderTable();
+}
+
+function renderTable(){
+  var card = document.getElementById("table-card");
+  var html2 = "<table><thead>";
+  if(currentView==="lead"){
+    // Group by lead
+    var byLead = {};
+    enriched.forEach(function(r){
+      if(!byLead[r.lead]) byLead[r.lead]={missions:0,cost:0,flights:{}};
+      byLead[r.lead].missions += r.missions;
+      byLead[r.lead].cost += r.leadCost;
+      byLead[r.lead].flights[r.flight]=(byLead[r.lead].flights[r.flight]||0)+r.missions;
+    });
+    var rows2 = Object.keys(byLead).sort(function(a,b){return byLead[b].missions-byLead[a].missions;});
+    var maxM = Math.max.apply(null, rows2.map(function(l){return byLead[l].missions;}));
+    html2 += "<tr><th>Team Lead</th><th class='c'>Flights</th><th class='c'>Missions</th><th class='r'>Food Cost Share</th><th class='r'>Avg Cost/Mission</th></tr></thead><tbody>";
+    rows2.forEach(function(lead){
+      var d = byLead[lead];
+      var flightBadges = Object.keys(d.flights).map(function(f){return "<span class='badge'>"+f+"</span>";}).join(" ");
+      var pct = Math.round(d.missions/maxM*100);
+      html2 += "<tr><td><strong>"+lead+"</strong><div class='bar-wrap'><div class='bar-fill' style='width:"+pct+"%;'></div></div></td>";
+      html2 += "<td class='c'>"+flightBadges+"</td>";
+      html2 += "<td class='c'>"+d.missions+"</td>";
+      html2 += "<td class='r'>"+fmt(d.cost)+"</td>";
+      html2 += "<td class='r green'>"+fmt(d.cost/d.missions)+"</td></tr>";
+    });
+    html2 += "</tbody><tfoot><tr><td colspan='2'><strong>Total</strong></td><td class='c'>"+grandMissions+"</td><td class='r'>"+fmt(grandCost)+"</td><td class='r green'>"+fmt(grandCost/grandMissions)+"</td></tr></tfoot>";
+  } else if(currentView==="date"){
+    html2 += "<tr><th>Date</th><th>Flight</th><th class='c'>Leads</th><th class='c'>Missions</th><th class='r'>Food Cost</th><th class='r'>Cost/Mission</th></tr></thead><tbody>";
+    var byDate = {};
+    enriched.forEach(function(r){
+      var k=r.date+"|"+r.flight;
+      if(!byDate[k]) byDate[k]={date:r.date,flight:r.flight,route:r.route,leads:new Set(),missions:0,cost:r.totalCost,cpm:r.cpm};
+      byDate[k].leads.add(r.lead);
+      byDate[k].missions+=r.missions;
+    });
+    Object.keys(byDate).sort().forEach(function(k){
+      var d=byDate[k];
+      html2 += "<tr><td>"+fdate(d.date)+"</td><td><span class='badge'>"+d.flight+"</span> <span class='m'>"+d.route+"</span></td>";
+      html2 += "<td class='c'>"+d.leads.size+"</td><td class='c'>"+d.missions+"</td>";
+      html2 += "<td class='r'>"+fmt(d.cost)+"</td><td class='r green'>"+fmt(d.cpm)+"</td></tr>";
+    });
+    html2 += "</tbody>";
+  } else {
+    html2 += "<tr><th>Flight</th><th>Route</th><th class='c'>Missions</th><th class='r'>Total Cost</th><th class='r'>Cost/Mission</th></tr></thead><tbody>";
+    var byFl = {};
+    enriched.forEach(function(r){
+      if(!byFl[r.flight]) byFl[r.flight]={route:r.route,missions:0,cost:0};
+      byFl[r.flight].missions+=r.missions; byFl[r.flight].cost+=r.leadCost;
+    });
+    Object.keys(byFl).sort().forEach(function(f){
+      var d=byFl[f];
+      html2 += "<tr><td><span class='badge'>"+f+"</span></td><td class='m'>"+d.route+"</td>";
+      html2 += "<td class='c'>"+d.missions+"</td><td class='r'>"+fmt(d.cost)+"</td><td class='r green'>"+fmt(d.cost/d.missions)+"</td></tr>";
+    });
+    html2 += "</tbody>";
+  }
+  html2 += "</table>";
+  card.innerHTML = html2;
+}
+
+renderTable();
 </script>
 </body>
 </html>
