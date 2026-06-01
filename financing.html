@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px;}
 .kpi{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;}
 .kpi .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;}
 .kpi .value{font-size:22px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
@@ -17,55 +17,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;margin-bottom:16px;}
 h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
 .chart-wrap{height:240px;position:relative;}
-.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
-.filters label{font-size:12px;color:#64748b;}
-.filters select{background:#131826;border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eef5;padding:5px 10px;font-size:12px;}
-.count{font-size:12px;color:#64748b;margin-left:auto;}
-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-thead th{padding:9px 12px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.07);text-align:left;position:sticky;top:0;background:#131826;}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.filters label{font-size:12px;color:#64748b;font-weight:500;}
+.filters select{background:#0f1623;border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eef5;padding:5px 10px;font-size:12px;outline:none;}
+.info{font-size:12px;color:#64748b;margin-left:auto;}
+.tbl-wrap{border-radius:10px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;max-height:540px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:10px 14px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;background:#131826;position:sticky;top:0;z-index:1;}
 thead th.r{text-align:right;}
-thead th.c{text-align:center;}
-tbody tr{border-bottom:1px solid rgba(255,255,255,0.035);}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);}
 tbody tr:hover{background:rgba(255,255,255,0.03);}
-tbody td{padding:8px 12px;}
+tbody td{padding:9px 14px;}
 tbody td.r{text-align:right;}
-tbody td.c{text-align:center;color:#94a3b8;}
-tbody td.m{color:#94a3b8;font-size:12px;}
-tfoot tr{background:rgba(255,255,255,0.05);border-top:2px solid rgba(255,255,255,0.1);}
-tfoot td{padding:9px 12px;font-weight:700;}
+tbody td.dim{color:#64748b;font-size:12px;}
+tfoot td{padding:10px 14px;font-weight:700;background:rgba(255,255,255,0.04);border-top:2px solid rgba(255,255,255,0.1);}
 tfoot td.r{text-align:right;color:#60a5fa;}
-tfoot td.c{text-align:center;color:#94a3b8;}
-.badge{font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;}
-.green{color:#34d399;font-weight:600;}
-.tbl-wrap{max-height:520px;overflow-y:auto;border-radius:10px;border:1px solid rgba(255,255,255,0.07);}
+.badge{display:inline-block;font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.badge.v110{background:rgba(52,211,153,0.15);color:#34d399;}
+.cpm{color:#34d399;font-weight:600;}
 </style>
 </head>
 <body>
+
 <div class="kpis" id="kpis"></div>
+
 <div class="section-title">Daily Food Cost - May 2026</div>
 <div class="card">
-  <h3>Food Cost by Flight (USD)</h3>
+  <h3>Total Food Cost per Flight (USD)</h3>
   <div class="chart-wrap"><canvas id="chart"></canvas></div>
 </div>
-<div class="section-title">Cost per Mission</div>
-<div class="card" style="padding:16px 20px 0;">
-  <div class="filters">
-    <label>Flight:</label>
-    <select id="fFlight" onchange="renderTable()">
-      <option value="">All</option>
-      <option value="104">V104 (ATL-LHR)</option>
-      <option value="110">V110 (ATL-MAN)</option>
-    </select>
-    <label>Date:</label>
-    <select id="fDate" onchange="renderTable()">
-      <option value="">All</option>
-    </select>
-    <label>Lead:</label>
-    <select id="fLead" onchange="renderTable()">
-      <option value="">All</option>
-    </select>
-    <span class="count" id="rowCount"></span>
-  </div>
+
+<div class="section-title">Food Cost Per Mission</div>
+<div class="filters">
+  <label>Flight:</label>
+  <select id="fFlight" onchange="render()">
+    <option value="">All Flights</option>
+    <option value="104">V104 - ATL to LHR</option>
+    <option value="110">V110 - ATL to MAN</option>
+  </select>
+  <label>Date:</label>
+  <select id="fDate" onchange="render()"><option value="">All Dates</option></select>
+  <label>Lead:</label>
+  <select id="fLead" onchange="render()"><option value="">All Leads</option></select>
+  <span class="info" id="info"></span>
 </div>
 <div class="tbl-wrap">
   <table>
@@ -74,24 +68,25 @@ tfoot td.c{text-align:center;color:#94a3b8;}
         <th>Date</th>
         <th>Flight</th>
         <th>Team Lead</th>
-        <th class="c">Asset</th>
-        <th class="c">Type</th>
+        <th>Aircraft</th>
         <th class="r">Food Cost / Mission</th>
+        <th class="r">Daily Total</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
     <tfoot>
       <tr>
-        <td colspan="4"><strong>Filtered Total</strong></td>
-        <td class="c" id="ftotm"></td>
-        <td class="r" id="ftotc"></td>
+        <td colspan="3">Showing total</td>
+        <td class="dim" id="fcount"></td>
+        <td class="r" id="fcpm"></td>
+        <td class="r" id="ftotal"></td>
       </tr>
     </tfoot>
   </table>
 </div>
 
 <script>
-var fc = {
+var foodCost = {
   "2026-05-01":{"104":8549.55,"110":6097.81},
   "2026-05-02":{"104":7696.54,"110":5747.35},
   "2026-05-03":{"104":8390.95,"110":6279.28},
@@ -123,109 +118,6 @@ var raw = [
   ["2026-05-01","110","Christian Lawson","330UNK","INC"],
   ["2026-05-01","104","Bobbie Jackson III","350UNK","INC"],
   ["2026-05-01","104","Gabriel Silva Mane","350UNK","INC"],
-  ["2026-04-30","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-30","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-30","104","Abdou Diakhate","A350_2","INC"],
-  ["2026-04-30","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-29","110","Abdou Diakhate","330UNK","INC"],
-  ["2026-04-29","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-29","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-28","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-04-28","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-28","104","Tecari Brown","350UNK","INC"],
-  ["2026-04-28","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-27","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-27","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-27","104","Maurice Smith","Unknown A3","INC"],
-  ["2026-04-27","104","Abubakarr Sessay","Unknown A3","INC"],
-  ["2026-04-26","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-26","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-25","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-25","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-25","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-25","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-24","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-24","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-24","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-24","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-23","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-23","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-23","104","Abdou Diakhate","A350_2","INC"],
-  ["2026-04-23","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-22","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-22","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-21","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-21","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-21","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-20","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-04-20","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-20","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-20","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-19","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-04-19","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-04-19","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-18","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-04-18","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-18","104","Abubakarr Sessay","A350_2","INC"],
-  ["2026-04-17","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-17","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-04-17","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-04-17","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-16","110","Abdou Diakhate","330UNK","INC"],
-  ["2026-04-16","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-16","104","Issa Camara","350UNK","INC"],
-  ["2026-04-16","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-04-15","110","Jeremy Allen","330UNK","INC"],
-  ["2026-04-15","104","Christian Lawson","A350_2","INC"],
-  ["2026-04-15","104","Maurice Smith","A350_2","INC"],
-  ["2026-04-15","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-14","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-14","104","Tecari Brown","G-VBOB","INC"],
-  ["2026-04-14","104","Abubakarr Sessay","G-VBOB","INC"],
-  ["2026-04-13","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-13","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-04-13","104","Maurice Smith","A350_2","INC"],
-  ["2026-04-13","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-12","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-12","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-11","110","Gabriel Silva Mane","330UNK","INC"],
-  ["2026-04-11","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-11","104","Tecari Brown","350UNK","INC"],
-  ["2026-04-11","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-04-10","104","Gabriel Silva Mane","350UNK","INC"],
-  ["2026-04-10","110","Maurice Smith","330UNK","INC"],
-  ["2026-04-10","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-10","104","Rachel Lester","350UNK","INC"],
-  ["2026-04-09","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-09","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-04-09","104","Abdou Diakhate","A350_2","INC"],
-  ["2026-04-09","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-08","104","Abdou Diakhate","A350_2","INC"],
-  ["2026-04-08","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-07","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-07","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-06","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-06","104","Issa Camara","A350_2","INC"],
-  ["2026-05-17","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-17","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-05-16","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-16","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-05-15","110","Maurice Smith","330UNK","INC"],
-  ["2026-05-15","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-15","104","Christian Lawson","A350_2","INC"],
-  ["2026-05-14","110","Tecari Brown","330UNK","INC"],
-  ["2026-05-14","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-14","104","Christian Lawson","350UNK","INC"],
-  ["2026-05-14","104","Abdou Diakhate","350UNK","INC"],
-  ["2026-05-13","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-05-13","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-05-13","110","Abdou Diakhate","330UNK","INC"],
-  ["2026-05-12","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-12","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-05-11","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-11","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-11","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-05-11","104","Abubakarr Sessay","A350_2","INC"],
   ["2026-05-10","104","Gabriel Silva Mane","350UNK","INC"],
   ["2026-05-10","104","Rachel Lester","350UNK","INC"],
   ["2026-05-10","110","Claudette St. Juste","330UNK","INC"],
@@ -263,155 +155,69 @@ var raw = [
   ["2026-05-01","110","Maurice Smith","330UNK","INC"],
   ["2026-05-01","110","Christian Lawson","330UNK","INC"],
   ["2026-05-01","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-05-01","104","Gabriel Silva Mane","350UNK","INC"],
-  ["2026-04-30","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-30","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-30","104","Abdou Diakhate","A350_2","INC"],
-  ["2026-04-30","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-29","110","Abdou Diakhate","330UNK","INC"],
-  ["2026-04-29","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-29","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-28","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-04-28","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-28","104","Tecari Brown","350UNK","INC"],
-  ["2026-04-28","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-27","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-27","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-27","104","Maurice Smith","Unknown A3","INC"],
-  ["2026-04-27","104","Abubakarr Sessay","Unknown A3","INC"],
-  ["2026-04-26","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-26","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-25","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-25","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-25","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-25","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-24","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-24","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-04-24","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-24","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-23","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-23","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-23","104","Abdou Diakhate","A350_2","INC"],
-  ["2026-04-23","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-22","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-04-22","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-21","110","Tecari Brown","330UNK","INC"],
-  ["2026-04-21","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-21","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-20","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-04-20","110","Rachel Lester","330UNK","INC"],
-  ["2026-04-20","104","Claudette St. Juste","350UNK","INC"],
-  ["2026-04-20","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-04-19","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-04-19","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-04-19","110","Christian Lawson","330UNK","INC"],
-  ["2026-04-18","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-04-18","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-04-18","104","Abubakarr Sessay","A350_2","INC"],
-  ["2026-05-20","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-20","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-05-20","104","Abdou Diakhate","350UNK","INC"],
-  ["2026-05-19","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-19","104","Claudette St. Juste","A350_2","INC"],
-  ["2026-05-19","104","Tecari Brown","A350_2","INC"],
-  ["2026-05-18","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-05-18","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-05-18","104","Bobbie Jackson III","350UNK","INC"],
-  ["2026-05-21","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-05-21","110","Abdou Diakhate","330UNK","INC"],
-  ["2026-05-21","104","Tecari Brown","A350_2","INC"],
-  ["2026-05-21","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-25","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-25","110","Abubakarr Sessay","330UNK","INC"],
-  ["2026-05-25","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-05-24","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-24","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-05-23","110","Maurice Smith","330UNK","INC"],
-  ["2026-05-23","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-23","104","Tecari Brown","350UNK","INC"],
-  ["2026-05-23","104","Gabriel Silva Mane","350UNK","INC"],
-  ["2026-05-22","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-22","110","Bobbie Jackson III","330UNK","INC"],
-  ["2026-05-22","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-05-22","104","Gabriel Silva Mane","A350_2","INC"],
-  ["2026-05-26","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-26","104","Tecari Brown","350UNK","INC"],
-  ["2026-05-26","104","Abubakarr Sessay","350UNK","INC"],
-  ["2026-05-27","104","Tecari Brown","350UNK","INC"],
-  ["2026-05-27","110","Claudette St. Juste","330UNK","INC"],
-  ["2026-05-28","110","Maurice Smith","330UNK","INC"],
-  ["2026-05-28","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-28","104","Tecari Brown","A350_2","INC"],
-  ["2026-05-28","104","Bobbie Jackson III","A350_2","INC"],
-  ["2026-05-29","110","Christian Lawson","330UNK","INC"],
-  ["2026-05-29","104","Gabriel Silva Mane","A350_2","INC"],
-  ["2026-05-29","104","Maurice Smith","A350_2","INC"],
-  ["2026-05-30","110","Bobbie Jackson III","GVSXY","INC"]
+  ["2026-05-01","104","Gabriel Silva Mane","350UNK","INC"]
 ];
 
 function fmt(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fdate(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
+function fd(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
 
-// Count missions per date+outbound to get cost per mission
+// Count missions per date+outbound for cost split
 var mCount = {};
 raw.forEach(function(r){ var k=r[0]+"|"+r[1]; mCount[k]=(mCount[k]||0)+1; });
 
-// Build enriched rows
+// Enrich each row
 var data = raw.map(function(r){
-  var k=r[0]+"|"+r[1];
-  var dayCost = (fc[r[0]]||{})[r[1]]||0;
-  var total = mCount[k]||1;
-  return { date:r[0], outbound:r[1], lead:r[2], asset:r[3], type:r[4], cpm: dayCost/total, dayCost: dayCost, totalM: total };
-});
+  var dayCost = (foodCost[r[0]]||{})[r[1]]||0;
+  var total = mCount[r[0]+"|"+r[1]]||1;
+  return { date:r[0], ob:r[1], lead:r[2], asset:r[3], type:r[4], cpm:dayCost/total, dayCost:dayCost };
+}).sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:a.ob.localeCompare(b.ob); });
 
-// Populate filter dropdowns
-var dates = [...new Set(data.map(function(r){return r.date;}))].sort();
-var leads = [...new Set(data.map(function(r){return r.lead;}))].sort();
-var fDate = document.getElementById("fDate");
-var fLead = document.getElementById("fLead");
-dates.forEach(function(d){ var o=document.createElement("option"); o.value=d; o.textContent=fdate(d); fDate.appendChild(o); });
-leads.forEach(function(l){ var o=document.createElement("option"); o.value=l; o.textContent=l; fLead.appendChild(o); });
+// Populate filters
+var allDates=[...new Set(data.map(function(r){return r.date;}))].sort();
+var allLeads=[...new Set(data.map(function(r){return r.lead;}))].sort();
+var fd2=document.getElementById("fDate"), fl=document.getElementById("fLead");
+allDates.forEach(function(d){var o=document.createElement("option");o.value=d;o.textContent=fd(d);fd2.appendChild(o);});
+allLeads.forEach(function(l){var o=document.createElement("option");o.value=l;o.textContent=l;fl.appendChild(o);});
 
 // KPIs
-var totalCost = Object.keys(fc).reduce(function(s,d){ return s+(fc[d]["104"]||0)+(fc[d]["110"]||0); },0);
-var avgCpm = totalCost / data.length;
-document.getElementById("kpis").innerHTML =
-  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(totalCost)+"</div><div class='delta'>May 1-10 - V104 + V110</div></div>"+
-  "<div class='kpi'><div class='label'>Total Missions</div><div class='value'>"+data.length+"</div><div class='delta'>Outbound 104 and 110</div></div>"+
-  "<div class='kpi'><div class='label'>Avg Cost per Mission</div><div class='value'>"+fmt(avgCpm)+"</div><div class='delta'>across all dates</div></div>"+
-  "<div class='kpi'><div class='label'>V104 Missions</div><div class='value'>"+data.filter(function(r){return r.outbound==="104";}).length+"</div><div class='delta'>ATL-LHR</div></div>";
+var gtCost=Object.keys(foodCost).reduce(function(s,d){return s+(foodCost[d]["104"]||0)+(foodCost[d]["110"]||0);},0);
+document.getElementById("kpis").innerHTML=
+  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gtCost)+"</div><div class='delta'>May 1-10 - V104 + V110</div></div>"+
+  "<div class='kpi'><div class='label'>Matched Missions</div><div class='value'>"+data.length+"</div><div class='delta'>With Excel food cost data</div></div>"+
+  "<div class='kpi'><div class='label'>Avg Cost per Mission</div><div class='value'>"+fmt(gtCost/data.length)+"</div><div class='delta'>Equally split by day</div></div>"+
+  "<div class='kpi'><div class='label'>Team Leads</div><div class='value'>"+allLeads.length+"</div><div class='delta'>Across both flights</div></div>";
 
 // Chart
-var chartDates = Object.keys(fc).sort();
-new Chart(document.getElementById("chart"),{type:"bar",data:{labels:chartDates.map(function(d){return fdate(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:chartDates.map(function(d){return fc[d]["104"]||0;}),backgroundColor:"rgba(96,165,250,0.75)",borderRadius:4},{label:"V110 ATL-MAN",data:chartDates.map(function(d){return fc[d]["110"]||0;}),backgroundColor:"rgba(52,211,153,0.75)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
+var cd=Object.keys(foodCost).sort();
+new Chart(document.getElementById("chart"),{type:"bar",data:{labels:cd.map(function(d){return fd(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:cd.map(function(d){return foodCost[d]["104"]||0;}),backgroundColor:"rgba(96,165,250,0.75)",borderRadius:4},{label:"V110 ATL-MAN",data:cd.map(function(d){return foodCost[d]["110"]||0;}),backgroundColor:"rgba(52,211,153,0.75)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
 
-function renderTable(){
-  var flt = document.getElementById("fFlight").value;
-  var fdt = document.getElementById("fDate").value;
-  var fld = document.getElementById("fLead").value;
-  var filtered = data.filter(function(r){
-    return (!flt||r.outbound===flt) && (!fdt||r.date===fdt) && (!fld||r.lead===fld);
+function render(){
+  var flt=document.getElementById("fFlight").value;
+  var fdt=document.getElementById("fDate").value;
+  var fld=document.getElementById("fLead").value;
+  var rows=data.filter(function(r){return(!flt||r.ob===flt)&&(!fdt||r.date===fdt)&&(!fld||r.lead===fld);});
+  var html2="",totCpm=0,totDay=0,seen={};
+  rows.forEach(function(r){
+    totCpm+=r.cpm;
+    var dk=r.date+"|"+r.ob;
+    if(!seen[dk]){totDay+=r.dayCost;seen[dk]=true;}
+    var bc=r.ob==="110"?"v110":"";
+    html2+="<tr>";
+    html2+="<td>"+fd(r.date)+"</td>";
+    html2+="<td><span class='badge "+bc+"'>V"+r.ob+"</span></td>";
+    html2+="<td><strong>"+r.lead+"</strong></td>";
+    html2+="<td class='dim'>"+r.asset+"</td>";
+    html2+="<td class='r cpm'>"+fmt(r.cpm)+"</td>";
+    html2+="<td class='r dim'>"+fmt(r.dayCost)+"</td>";
+    html2+="</tr>";
   });
-  var rows = "";
-  var totCost = 0;
-  filtered.forEach(function(r){
-    totCost += r.cpm;
-    rows += "<tr>";
-    rows += "<td>"+fdate(r.date)+"</td>";
-    rows += "<td><span class='badge'>V"+r.outbound+"</span></td>";
-    rows += "<td>"+r.lead+"</td>";
-    rows += "<td class='c m'>"+r.asset+"</td>";
-    rows += "<td class='c m'>"+r.type+"</td>";
-    rows += "<td class='r green'>"+fmt(r.cpm)+"</td>";
-    rows += "</tr>";
-  });
-  document.getElementById("tbody").innerHTML = rows;
-  document.getElementById("rowCount").textContent = filtered.length + " missions";
-  document.getElementById("ftotm").textContent = filtered.length;
-  document.getElementById("ftotc").textContent = fmt(totCost);
+  document.getElementById("tbody").innerHTML=html2;
+  document.getElementById("info").textContent=rows.length+" missions shown";
+  document.getElementById("fcount").textContent=rows.length+" missions";
+  document.getElementById("fcpm").textContent=fmt(totCpm);
+  document.getElementById("ftotal").textContent=fmt(totDay);
 }
-
-renderTable();
+render();
 </script>
 </body>
 </html>
