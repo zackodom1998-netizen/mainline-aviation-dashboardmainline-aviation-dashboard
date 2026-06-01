@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 90" width="200" height="90">
-  <!-- Red wing / swoosh shape -->
-  <path d="M10,15 Q30,5 55,20 Q40,35 20,40 Z" fill="#C41E3A"/>
-  <path d="M18,38 Q45,28 70,10 Q80,6 90,8 Q75,25 55,38 Q38,48 18,38 Z" fill="#C41E3A"/>
-  <!-- Virgin text in red script style -->
-  <text x="60" y="38" font-family="Georgia, serif" font-size="28" font-style="italic" font-weight="bold" fill="#C41E3A" letter-spacing="-1">Virgin</text>
-  <!-- atlantic text in purple -->
-  <text x="14" y="62" font-family="Arial, sans-serif" font-size="22" font-weight="300" fill="#3D1152" letter-spacing="4">atlantic</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 95">
+  <!-- Red wing swoosh -->
+  <path d="M8,42 C12,20 28,8 48,12 C38,22 28,34 22,46 Z" fill="#C41E3A"/>
+  <path d="M22,46 C30,32 44,18 62,10 C76,4 88,6 95,12 C80,20 64,32 52,46 C40,56 26,54 22,46 Z" fill="#C41E3A"/>
+  <!-- Virgin - italic serif -->
+  <text x="68" y="44" font-family="Times New Roman, Times, serif" font-size="32" font-style="italic" font-weight="bold" fill="#C41E3A">Virgin</text>
+  <!-- atlantic - purple, tracked out -->
+  <text x="8" y="72" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#3B0E5E" letter-spacing="5">atlantic</text>
 </svg>
