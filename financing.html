@@ -38,7 +38,7 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 </style>
 </head>
 <body>
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px 18px;background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="background:#C41E3A;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;color:#fff;letter-spacing:0.05em;">VS</div><div><div style="font-size:15px;font-weight:700;color:#e8eef5;">Virgin Atlantic</div><div style="font-size:12px;color:#64748b;">Supplier Invoice Report - May 2026 &middot; ATL Hub</div></div></div><div class="kpis" id="kpis"></div>
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px 20px;background:#fff;border-radius:10px;"><img src="va-logo.svg" alt="Virgin Atlantic" style="height:60px;width:auto;display:block;"/><div style="border-left:1px solid #eee;padding-left:16px;"><div style="font-size:11px;font-weight:600;color:#3B0E5E;text-transform:uppercase;letter-spacing:0.1em;">Supplier Invoice Report</div><div style="font-size:13px;color:#666;margin-top:2px;">May 2026 &middot; ATL Hub</div></div></div><div class="kpis" id="kpis"></div>
 <div class="section-title">Daily Food Cost - May 2026</div>
 <div class="card"><h3>Total Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
 <div class="section-title">Virgin Atlantic - Cost Breakdown (All 20 Flights)</div>
@@ -93,7 +93,7 @@ function render(){
   rows.forEach(function(r){
     var bc=r.ob==="110"?"v110":"";tc+=r.cost;
     var lh=r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join("");
-    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.ob+"</span></td><td><span style='background:rgba(196,30,58,0.15);color:#f87171;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;'>Virgin Atlantic</span></td><td class='dim'>"+r.route+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";
+    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.ob+"</span></td><td><img src='va-logo.svg' alt='Virgin Atlantic' style='height:28px;width:auto;background:#fff;border-radius:4px;padding:2px 6px;'/></td><td class='dim'>"+r.route+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";
   });
   document.getElementById("tbody").innerHTML=h2;
   document.getElementById("info").textContent=rows.length+" rows";
