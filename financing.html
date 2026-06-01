@@ -24,22 +24,18 @@ h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
 .tbl-wrap{border-radius:10px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 thead th{padding:10px 14px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;background:#131826;}
-thead th.r{text-align:right;}
-thead th.c{text-align:center;}
+thead th.r{text-align:right;}thead th.c{text-align:center;}
 tbody tr{border-bottom:1px solid rgba(255,255,255,0.05);}
 tbody tr:hover{background:rgba(255,255,255,0.025);}
-tbody td{padding:11px 14px;vertical-align:middle;}
-tbody td.r{text-align:right;}
-tbody td.c{text-align:center;}
-tbody td.dim{color:#64748b;font-size:12px;}
+tbody td{padding:10px 14px;vertical-align:middle;}
+tbody td.r{text-align:right;}tbody td.c{text-align:center;}tbody td.dim{color:#64748b;font-size:12px;}
 tfoot td{padding:10px 14px;font-weight:700;background:rgba(255,255,255,0.04);border-top:2px solid rgba(255,255,255,0.1);}
-tfoot td.r{text-align:right;color:#60a5fa;}
-tfoot td.c{text-align:center;color:#64748b;}
+tfoot td.r{text-align:right;color:#60a5fa;}tfoot td.c{text-align:center;color:#64748b;}
 .badge{display:inline-block;font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
 .badge.v110{background:rgba(52,211,153,0.15);color:#34d399;}
 .cpm{color:#34d399;font-weight:600;}
 .leads{display:flex;flex-wrap:wrap;gap:5px;}
-.lead-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;font-size:12px;color:#cbd5e1;}
+.chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;font-size:12px;color:#cbd5e1;}
 .mc{display:inline-block;background:rgba(255,255,255,0.07);border-radius:10px;padding:1px 8px;font-size:12px;color:#94a3b8;}
 </style>
 </head>
@@ -53,44 +49,18 @@ tfoot td.c{text-align:center;color:#64748b;}
 <div class="section-title">Food Cost per Mission</div>
 <div class="filters">
   <label>Flight:</label>
-  <select id="fFlight" onchange="render()">
-    <option value="">All Flights</option>
-    <option value="104">V104 - ATL to LHR</option>
-    <option value="110">V110 - ATL to MAN</option>
-  </select>
+  <select id="fF" onchange="render()"><option value="">All Flights</option><option value="104">V104 - ATL to LHR</option><option value="110">V110 - ATL to MAN</option></select>
   <label>Date:</label>
-  <select id="fDate" onchange="render()"><option value="">All Dates</option></select>
+  <select id="fD" onchange="render()"><option value="">All Dates</option></select>
   <span class="info" id="info"></span>
 </div>
-<div class="tbl-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Flight</th>
-        <th>Aircraft</th>
-        <th>Team Leads</th>
-        <th class="c">Missions</th>
-        <th class="r">Cost / Mission</th>
-        <th class="r">Total</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-    <tfoot>
-      <tr>
-        <td colspan="4">Total</td>
-        <td class="c" id="ftotm"></td>
-        <td class="r" id="favg"></td>
-        <td class="r" id="ftot"></td>
-      </tr>
-    </tfoot>
-  </table>
-</div>
-
+<div class="tbl-wrap"><table>
+  <thead><tr><th>Date</th><th>Flight</th><th>Aircraft</th><th>Team Lead(s)</th><th class="c">Missions</th><th class="r">Cost / Mission</th><th class="r">Total</th></tr></thead>
+  <tbody id="tbody"></tbody>
+  <tfoot><tr><td colspan="4">Total</td><td class="c" id="fm"></td><td class="r" id="fa"></td><td class="r" id="ft"></td></tr></tfoot>
+</table></div>
 <script>
-var foodCost={"2026-05-01":{"104":8549.55,"110":6097.81},"2026-05-02":{"104":7696.54,"110":5747.35},"2026-05-03":{"104":8390.95,"110":6279.28},"2026-05-04":{"104":8300.94,"110":6396.47},"2026-05-05":{"104":7652.39,"110":6132.13},"2026-05-06":{"104":7356.35,"110":5658.77},"2026-05-07":{"104":7721.96,"110":5991.99},"2026-05-08":{"104":8131.25,"110":6033.51},"2026-05-09":{"104":8219.44,"110":6430.59},"2026-05-10":{"104":8233.10,"110":6047.14}};
-
-// [date, outbound, asset, missions, cpm, groupTotal, [leads]]
+var fc={"2026-05-01":{"104":8549.55,"110":6097.81},"2026-05-02":{"104":7696.54,"110":5747.35},"2026-05-03":{"104":8390.95,"110":6279.28},"2026-05-04":{"104":8300.94,"110":6396.47},"2026-05-05":{"104":7652.39,"110":6132.13},"2026-05-06":{"104":7356.35,"110":5658.77},"2026-05-07":{"104":7721.96,"110":5991.99},"2026-05-08":{"104":8131.25,"110":6033.51},"2026-05-09":{"104":8219.44,"110":6430.59},"2026-05-10":{"104":8233.10,"110":6047.14}};
 var raw=[
   ["2026-05-01","104","350UNK",4,2137.3875,8549.55,["Bobbie Jackson III","Gabriel Silva Mane"]],
   ["2026-05-01","110","330UNK",4,1524.4525,6097.81,["Maurice Smith","Christian Lawson"]],
@@ -104,64 +74,55 @@ var raw=[
   ["2026-05-05","110","330UNK",2,3066.0650,6132.13,["Christian Lawson"]],
   ["2026-05-06","104","A350_2",1,3678.1750,3678.18,["Christian Lawson"]],
   ["2026-05-06","104","350UNK",1,3678.1750,3678.18,["Tecari Brown"]],
-  ["2026-05-06","110","330UNK",2,2829.3850,5658.77,["Claudette St. Juste","Abdou Diakhate"]],
-  ["2026-05-07","104","350UNK",2,3860.9800,7721.96,["Christian Lawson","Abdou Diakhate"]],
-  ["2026-05-07","110","330UNK",2,2995.9950,5991.99,["Bobbie Jackson III","Abdou Diakhate"]],
-  ["2026-05-08","104","350UNK",2,4065.6250,8131.25,["Gabriel Silva Mane","Maurice Smith"]],
-  ["2026-05-08","110","GVSXY",2,3016.7550,6033.51,["Christian Lawson","Bobbie Jackson III"]],
-  ["2026-05-09","104","350UNK",2,4109.7200,8219.44,["Maurice Smith","Gabriel Silva Mane"]],
-  ["2026-05-09","110","330UNK",2,3215.2950,6430.59,["Christian Lawson","Bobbie Jackson III"]],
-  ["2026-05-10","104","350UNK",2,4116.5500,8233.10,["Gabriel Silva Mane","Rachel Lester"]],
-  ["2026-05-10","110","330UNK",2,3023.5700,6047.14,["Claudette St. Juste","Maurice Smith"]]
+  ["2026-05-06","110","330UNK",1,2829.3850,2829.39,["Claudette St. Juste"]],
+  ["2026-05-06","110","330UNK",1,2829.3850,2829.39,["Abdou Diakhate"]],
+  ["2026-05-07","104","350UNK",1,3860.9800,3860.98,["Christian Lawson"]],
+  ["2026-05-07","104","350UNK",1,3860.9800,3860.98,["Abdou Diakhate"]],
+  ["2026-05-07","110","330UNK",1,2995.9950,2995.99,["Bobbie Jackson III"]],
+  ["2026-05-07","110","330UNK",1,2995.9950,2995.99,["Abdou Diakhate"]],
+  ["2026-05-08","104","350UNK",1,4065.6250,4065.63,["Gabriel Silva Mane"]],
+  ["2026-05-08","104","350UNK",1,4065.6250,4065.63,["Maurice Smith"]],
+  ["2026-05-08","110","GVSXY",1,3016.7550,3016.76,["Christian Lawson"]],
+  ["2026-05-08","110","GVSXY",1,3016.7550,3016.76,["Bobbie Jackson III"]],
+  ["2026-05-09","104","350UNK",1,4109.7200,4109.72,["Maurice Smith"]],
+  ["2026-05-09","104","350UNK",1,4109.7200,4109.72,["Gabriel Silva Mane"]],
+  ["2026-05-09","110","330UNK",1,3215.2950,3215.3,["Christian Lawson"]],
+  ["2026-05-09","110","330UNK",1,3215.2950,3215.3,["Bobbie Jackson III"]],
+  ["2026-05-10","104","350UNK",1,4116.5500,4116.55,["Gabriel Silva Mane"]],
+  ["2026-05-10","104","350UNK",1,4116.5500,4116.55,["Rachel Lester"]],
+  ["2026-05-10","110","330UNK",1,3023.5700,3023.57,["Claudette St. Juste"]],
+  ["2026-05-10","110","330UNK",1,3023.5700,3023.57,["Maurice Smith"]]
 ];
-
 function fmt(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fd(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
-
 var data=raw.map(function(r){return{date:r[0],ob:r[1],asset:r[2],missions:r[3],cpm:r[4],total:r[5],leads:r[6]};});
-
-// Populate filters
-var allDates=[...new Set(data.map(function(r){return r.date;}))].sort();
-allDates.forEach(function(d){var o=document.createElement("option");o.value=d;o.textContent=fd(d);document.getElementById("fDate").appendChild(o);});
-
-// KPIs
-var gtCost=Object.keys(foodCost).reduce(function(s,d){return s+(foodCost[d]["104"]||0)+(foodCost[d]["110"]||0);},0);
-var totM=data.reduce(function(s,r){return s+r.missions;},0);
-var allLeads=new Set(); data.forEach(function(r){r.leads.forEach(function(l){allLeads.add(l);});});
+var dates=[...new Set(data.map(function(r){return r.date;}))].sort();
+dates.forEach(function(d){var o=document.createElement("option");o.value=d;o.textContent=fd(d);document.getElementById("fD").appendChild(o);});
+var gt=Object.keys(fc).reduce(function(s,d){return s+(fc[d]["104"]||0)+(fc[d]["110"]||0);},0);
+var tm=data.reduce(function(s,r){return s+r.missions;},0);
+var leads=new Set();data.forEach(function(r){r.leads.forEach(function(l){leads.add(l);});});
 document.getElementById("kpis").innerHTML=
-  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gtCost)+"</div><div class='delta'>May 1-10 - V104 + V110</div></div>"+
-  "<div class='kpi'><div class='label'>Total Missions</div><div class='value'>"+totM+"</div><div class='delta'>Matched with Excel</div></div>"+
-  "<div class='kpi'><div class='label'>Avg Cost / Mission</div><div class='value'>"+fmt(gtCost/totM)+"</div><div class='delta'>Split equally per day</div></div>"+
-  "<div class='kpi'><div class='label'>Team Leads</div><div class='value'>"+allLeads.size+"</div><div class='delta'>Across V104 + V110</div></div>";
-
-// Chart
-var cd=Object.keys(foodCost).sort();
-new Chart(document.getElementById("chart"),{type:"bar",data:{labels:cd.map(function(d){return fd(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:cd.map(function(d){return foodCost[d]["104"]||0;}),backgroundColor:"rgba(96,165,250,0.75)",borderRadius:4},{label:"V110 ATL-MAN",data:cd.map(function(d){return foodCost[d]["110"]||0;}),backgroundColor:"rgba(52,211,153,0.75)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
-
+  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gt)+"</div><div class='delta'>May 1-10 - V104 + V110</div></div>"+
+  "<div class='kpi'><div class='label'>Total Missions</div><div class='value'>"+tm+"</div><div class='delta'>Matched with Excel</div></div>"+
+  "<div class='kpi'><div class='label'>Avg Cost / Mission</div><div class='value'>"+fmt(gt/tm)+"</div><div class='delta'>Split equally per day</div></div>"+
+  "<div class='kpi'><div class='label'>Team Leads</div><div class='value'>"+leads.size+"</div><div class='delta'>Across V104 + V110</div></div>";
+var cd=Object.keys(fc).sort();
+new Chart(document.getElementById("chart"),{type:"bar",data:{labels:cd.map(function(d){return fd(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:cd.map(function(d){return fc[d]["104"]||0;}),backgroundColor:"rgba(96,165,250,0.75)",borderRadius:4},{label:"V110 ATL-MAN",data:cd.map(function(d){return fc[d]["110"]||0;}),backgroundColor:"rgba(52,211,153,0.75)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
 function render(){
-  var flt=document.getElementById("fFlight").value;
-  var fdt=document.getElementById("fDate").value;
+  var flt=document.getElementById("fF").value,fdt=document.getElementById("fD").value;
   var rows=data.filter(function(r){return(!flt||r.ob===flt)&&(!fdt||r.date===fdt);});
-  var html2="",totM=0,totC=0;
+  var h2="",tm2=0,tc=0;
   rows.forEach(function(r){
     var bc=r.ob==="110"?"v110":"";
-    totM+=r.missions; totC+=r.total;
-    var chips=r.leads.map(function(l){return "<span class='lead-chip'>"+l+"</span>";}).join("");
-    html2+="<tr>";
-    html2+="<td>"+fd(r.date)+"</td>";
-    html2+="<td><span class='badge "+bc+"'>V"+r.ob+"</span></td>";
-    html2+="<td class='dim'>"+r.asset+"</td>";
-    html2+="<td><div class='leads'>"+chips+"</div></td>";
-    html2+="<td class='c'><span class='mc'>"+r.missions+"</span></td>";
-    html2+="<td class='r'>"+fmt(r.cpm)+"</td>";
-    html2+="<td class='r cpm'>"+fmt(r.total)+"</td>";
-    html2+="</tr>";
+    tm2+=r.missions;tc+=r.total;
+    var chips=r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join("");
+    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.ob+"</span></td><td class='dim'>"+r.asset+"</td><td><div class='leads'>"+chips+"</div></td><td class='c'><span class='mc'>"+r.missions+"</span></td><td class='r'>"+fmt(r.cpm)+"</td><td class='r cpm'>"+fmt(r.total)+"</td></tr>";
   });
-  document.getElementById("tbody").innerHTML=html2;
-  document.getElementById("info").textContent=rows.length+" entries";
-  document.getElementById("ftotm").textContent=totM;
-  document.getElementById("favg").textContent=fmt(totC/totM);
-  document.getElementById("ftot").textContent=fmt(totC);
+  document.getElementById("tbody").innerHTML=h2;
+  document.getElementById("info").textContent=rows.length+" rows";
+  document.getElementById("fm").textContent=tm2;
+  document.getElementById("fa").textContent=fmt(tc/tm2);
+  document.getElementById("ft").textContent=fmt(tc);
 }
 render();
 </script>
