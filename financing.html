@@ -161,7 +161,7 @@ document.getElementById("vs-kpis").innerHTML=
   "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gt)+"</div><div class='delta'>May 1-10 &mdash; V104 + V110</div></div>"+
   "<div class='kpi'><div class='label'>V104 &mdash; ATL to LHR</div><div class='value'>"+fmt(v104t)+"</div><div class='delta'>10 departures</div></div>"+
   "<div class='kpi'><div class='label'>V110 &mdash; ATL to MAN</div><div class='value'>"+fmt(v110t)+"</div><div class='delta'>10 departures</div></div>"+
-  "<div class='kpi'><div class='label'>Avg Cost / Mission</div><div class='value'>"+fmt(gt/56)+"</div><div class='delta'>56 matched missions · May 2026</div></div>";
+  "<div class='kpi'><div class='label'>Avg Cost / Mission</div><div class='value'>"+fmt(gt/56)+"</div><div class='delta'>56 matched missions · May 2026</div></div>"+
 var dates=[...new Set(vsData.map(function(r){return r.date;}))].sort();
 
 var vsChart=null;
