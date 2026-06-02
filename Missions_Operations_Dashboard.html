@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Mainline Aviation · Sullivan Rd Missions Dashboard</title>
+<title>Mainline Aviation Â· Sullivan Rd Missions Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/gridjs@5.0.2/dist/gridjs.umd.js" integrity="sha384-/XXDzxe4FsGiAe50i/u9pY/Vy/uX654MHB1xoc1BJNnH1WXHhqHga9g3q5tF4gj7" crossorigin="anonymous"></script>
 <style>
@@ -366,7 +366,7 @@ body.wall .wall-banner .pulse {
   border-radius: 2px;
   pointer-events: none;
 }
-/* Mission colors — applied to lane-label and lane-accent via inline style */
+/* Mission colors â applied to lane-label and lane-accent via inline style */
 .tl-times .lbl.m1 .ev, .tl-bar.multi .lane-label.m1 { color: #22d3ee; }
 .tl-times .lbl.m2 .ev, .tl-bar.multi .lane-label.m2 { color: #a78bfa; }
 .tl-times .lbl.m3 .ev, .tl-bar.multi .lane-label.m3 { color: #4ade80; }
@@ -577,7 +577,7 @@ body.wall .wall-banner .pulse {
     <label>Asset Type</label>
     <select id="fAsset"><option value="">All</option></select>
     <button class="reset" id="resetBtn">Reset</button>
-    <span class="badge" id="countBadge">— missions</span>
+    <span class="badge" id="countBadge">â missions</span>
   </section>
 
   <div class="tab-panel active" id="panel-overview">
@@ -592,7 +592,7 @@ body.wall .wall-banner .pulse {
     <div class="section-title">Volume</div>
     <section class="grid grid-1">
       <div class="card">
-        <h3>Mission Volume by Hour <span class="hint">when work began · EDT</span></h3>
+        <h3>Mission Volume by Hour <span class="hint">when work began Â· EDT</span></h3>
         <div class="card-chart"><canvas id="cHour"></canvas></div>
       </div>
     </section>
@@ -615,7 +615,7 @@ body.wall .wall-banner .pulse {
     <div class="section-title">Mission Count by Team Lead</div>
     <section class="grid grid-1">
       <div class="card">
-        <h3>Total missions per lead <span class="hint">in current filter · sorted most-active first</span></h3>
+        <h3>Total missions per lead <span class="hint">in current filter Â· sorted most-active first</span></h3>
         <div class="card-chart xtall"><canvas id="cMissionCount"></canvas></div>
       </div>
     </section>
@@ -623,21 +623,21 @@ body.wall .wall-banner .pulse {
     <div class="section-title">Avg Intra-Shift Transit Gap</div>
     <section class="grid grid-1">
       <div class="card">
-        <h3>Prior Mission Completed → Next Team Arrival <span class="hint">intra-shift only · sorted fastest first</span></h3>
+        <h3>Prior Mission Completed â Next Team Arrival <span class="hint">intra-shift only Â· sorted fastest first</span></h3>
         <div class="card-chart xtall"><canvas id="cTransit"></canvas></div>
       </div>
     </section>
     <div class="section-title">Avg Response Time</div>
     <section class="grid grid-1">
       <div class="card">
-        <h3>Mission Accepted → Team Arrival <span class="hint">engagement > 0%</span></h3>
+        <h3>Mission Accepted â Team Arrival <span class="hint">engagement > 0%</span></h3>
         <div class="card-chart xtall"><canvas id="cResponse"></canvas></div>
       </div>
     </section>
     <div class="section-title">Avg Productivity</div>
     <section class="grid grid-1">
       <div class="card">
-        <h3>Per-Lead Productivity Score <span class="hint">≥5 missions · 100% target</span></h3>
+        <h3>Per-Lead Productivity Score <span class="hint">â¥5 missions Â· 100% target</span></h3>
         <div class="card-chart xtall"><canvas id="cTeamLead"></canvas></div>
       </div>
     </section>
@@ -652,7 +652,7 @@ body.wall .wall-banner .pulse {
   </div>
 
     <div class="tab-panel" id="panel-timeline">
-    <div class="section-title">Mission Timeline · most recent first</div>
+    <div class="section-title">Mission Timeline Â· most recent first</div>
 
     <section class="card" style="padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px;">
       <span style="font-family: var(--mono); font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em;">View:</span>
@@ -664,17 +664,17 @@ body.wall .wall-banner .pulse {
 
     <section class="card" style="padding: 14px 18px; margin-bottom: 14px;">
       <div class="timeline-legend">
-        <span class="tl-seg delayed"></span><span>Flight late — scheduled vs actual arrival gap</span>
-        <span class="tl-seg pre"></span><span>Pre-acceptance — flight on ground, mission waiting</span>
-        <span class="tl-seg drive"></span><span>Response — accepted → team driving to gate</span>
-        <span class="tl-seg setup"></span><span>Setup — team arrived → starting work</span>
-        <span class="tl-seg active"></span><span>Active mission — in progress</span>
-        <span class="tl-seg buffer"></span><span>Buffer — completed → flight departure</span>
+        <span class="tl-seg delayed"></span><span>Flight late â scheduled vs actual arrival gap</span>
+        <span class="tl-seg pre"></span><span>Pre-acceptance â flight on ground, mission waiting</span>
+        <span class="tl-seg drive"></span><span>Response â accepted â team driving to gate</span>
+        <span class="tl-seg setup"></span><span>Setup â team arrived â starting work</span>
+        <span class="tl-seg active"></span><span>Active mission â in progress</span>
+        <span class="tl-seg buffer"></span><span>Buffer â completed â flight departure</span>
       </div>
     </section>
 
     <section class="card" style="padding: 16px 18px;">
-      <h3>Timeline rows <span class="hint">each row spans Scheduled/Actual Arrival → Flight Departure · hover for details</span></h3>
+      <h3>Timeline rows <span class="hint">each row spans Scheduled/Actual Arrival â Flight Departure Â· hover for details</span></h3>
       <div id="timelineList"></div>
       <div id="timelineMore" class="timeline-more"></div>
     </section>
@@ -683,12 +683,12 @@ body.wall .wall-banner .pulse {
   <div class="tab-panel" id="panel-missions">
     <div class="section-title">Mission Detail</div>
     <section class="table-card">
-      <h3>All Missions <span class="hint" style="font-weight:400;color:var(--text-3)">— click any column header to sort · search to filter further</span></h3>
+      <h3>All Missions <span class="hint" style="font-weight:400;color:var(--text-3)">â click any column header to sort Â· search to filter further</span></h3>
       <div id="tbl"></div>
     </section>
   </div>
 
-  <footer>Mainline Aviation · ATL Operations</footer>
+  <footer>Mainline Aviation Â· ATL Operations</footer>
 </div>
 
 <script>
@@ -706,9 +706,9 @@ const PALETTE = {
   continuity: { intra: "#22d3ee", shift_break: "#94a3b8", overlap: "#f87171", skipped: "#fbbf24", first: "#a78bfa" },
 };
 
-function fmtPct(v, d=0) { return v == null ? "—" : v.toFixed(d) + "%"; }
-function fmtMin(v, d=0) { return v == null ? "—" : v.toFixed(d) + " min"; }
-function fmtNum(v) { return v == null ? "—" : v.toLocaleString(); }
+function fmtPct(v, d=0) { return v == null ? "â" : v.toFixed(d) + "%"; }
+function fmtMin(v, d=0) { return v == null ? "â" : v.toFixed(d) + " min"; }
+function fmtNum(v) { return v == null ? "â" : v.toLocaleString(); }
 function uniqueSorted(arr) { return [...new Set(arr)].filter(Boolean).sort(); }
 function avg(arr) { const v = arr.filter(x => x != null); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; }
 function median(arr) {
@@ -782,10 +782,10 @@ function renderKpis(rows) {
     return v>=hi ? "good" : (v<lo ? "bad" : "warn");
   };
   const kpis = [
-    { label: "Total Missions", value: fmtNum(total), delta: proper + " proper · " + (total-proper) + " skipped" },
+    { label: "Total Missions", value: fmtNum(total), delta: proper + " proper Â· " + (total-proper) + " skipped" },
     { label: "On-Time Rate",   value: fmtPct(onTime,1), delta: lateCount + " late completions", cls: cls(onTime, 95, 85) },
     { label: "Avg Response",   value: fmtMin(respAvg,1), delta: "median " + fmtMin(respMed,0), cls: cls(respAvg, 60, 100, true) },
-    { label: "Avg Intra-Shift Transit", value: fmtMin(transitAvg,1), delta: "median " + fmtMin(transitMed,0) + " · n=" + intraRows.length, cls: cls(transitAvg, 15, 30, true) },
+    { label: "Avg Intra-Shift Transit", value: fmtMin(transitAvg,1), delta: "median " + fmtMin(transitMed,0) + " Â· n=" + intraRows.length, cls: cls(transitAvg, 15, 30, true) },
     { label: "Avg Productivity", value: fmtPct(prod,1), delta: "vs. 100% target", cls: cls(prod, 100, 70) },
     { label: "Avg Engagement",   value: fmtPct(eng,1), delta: "team participation", cls: cls(eng, 95, 80) },
   ];
@@ -795,7 +795,7 @@ function renderKpis(rows) {
        <div class="value">${k.value}</div>
        <div class="delta">${k.delta||""}</div>
      </div>`).join("");
-  document.getElementById("countBadge").textContent = "● " + fmtNum(total) + " missions";
+  document.getElementById("countBadge").textContent = "â " + fmtNum(total) + " missions";
 }
 
 function renderLeaderboard(rows) {
@@ -817,19 +817,19 @@ function renderLeaderboard(rows) {
   cards.sort((a,b) => (b.prod ?? -1) - (a.prod ?? -1));
   const html = cards.slice(0, 12).map((c, i) => {
     const rankClass = i < 3 ? "top" : "";
-    const medal = i === 0 ? "★" : (i === 1 ? "✦" : (i === 2 ? "✧" : "#" + (i+1)));
+    const medal = i === 0 ? "â" : (i === 1 ? "â¦" : (i === 2 ? "â§" : "#" + (i+1)));
     return `<div class="leader">
       <div class="rank ${rankClass}">${medal} ${i < 3 ? ["GOLD","SILVER","BRONZE"][i] : "RANK " + (i+1)}</div>
       <div class="name">${c.name}</div>
       <div class="stats">
         <span>Prod <b>${fmtPct(c.prod,0)}</b></span>
         <span>Resp <b>${fmtMin(c.resp,0)}</b></span>
-        <span>Transit <b>${c.transit != null ? Math.round(c.transit) + "m" : "—"}</b></span>
+        <span>Transit <b>${c.transit != null ? Math.round(c.transit) + "m" : "â"}</b></span>
         <span>Missions <b>${c.n}</b></span>
       </div>
     </div>`;
   }).join("");
-  document.getElementById("leaderboard").innerHTML = html || `<div class="leader"><div class="name" style="color:var(--text-3)">No leads with ≥5 missions in this filter</div></div>`;
+  document.getElementById("leaderboard").innerHTML = html || `<div class="leader"><div class="name" style="color:var(--text-3)">No leads with â¥5 missions in this filter</div></div>`;
 }
 
 const charts = {};
@@ -1010,12 +1010,12 @@ function renderCharts(rows) {
   const transitByLead = makeAvg(intraOnly, "tl", "transit").filter(e => e[2] >= 3).sort((a,b) => a[1] - b[1]);
   bar("cTransit",
     transitByLead.map(e => [e[0], +e[1].toFixed(1)]),
-    { horizontal: true, label: "Avg transit", suffix: " min", color: PALETTE.cyan, counts: transitByLead.map(e => e[2]), xtitle: "Avg minutes (prior completed → next arrival)" });
+    { horizontal: true, label: "Avg transit", suffix: " min", color: PALETTE.cyan, counts: transitByLead.map(e => e[2]), xtitle: "Avg minutes (prior completed â next arrival)" });
 
   const respLead = makeAvg(rows, "tl", "resp").filter(e => e[2] >= 5).sort((a,b) => a[1] - b[1]);
   bar("cResponse",
     respLead.map(e => [e[0], +e[1].toFixed(1)]),
-    { horizontal: true, label: "Avg Response", suffix: " min", color: PALETTE.purple, counts: respLead.map(e => e[2]), xtitle: "Avg minutes (accepted → team arrival)" });
+    { horizontal: true, label: "Avg Response", suffix: " min", color: PALETTE.purple, counts: respLead.map(e => e[2]), xtitle: "Avg minutes (accepted â team arrival)" });
 
   const tl = makeAvg(rows, "tl", "prod").filter(e => e[2] >= 5);
   bar("cTeamLead",
@@ -1036,13 +1036,13 @@ function parseSpringshotTs(s) {
   return new Date(year, monthIdx, parseInt(m[2]), parseInt(m[3]), parseInt(m[4])).getTime();
 }
 function fmtDur(min) {
-  if (min == null) return "—";
+  if (min == null) return "â";
   if (min < 60) return Math.round(min) + "m";
   const h = Math.floor(min/60), mm = Math.round(min%60);
   return h + "h " + (mm < 10 ? "0" + mm : mm) + "m";
 }
 function fmtClock(s) {
-  if (!s) return "—";
+  if (!s) return "â";
   const m = s.match(/^(\w+ \d+), (\d+:\d+)/);
   return m ? m[1] + " " + m[2] : s;
 }
@@ -1244,24 +1244,24 @@ function renderTimelinePerMission(TL, list, more) {
 
 let grid = null;
 function transitDisplay(r) {
-  if (r.transit_kind === "skipped") return "— (skipped)";
-  if (r.transit_kind === "first") return "— (first)";
-  if (r.transit == null) return "—";
-  if (r.transit_kind === "overlap") return r.transit.toFixed(0) + "m ⚠";
+  if (r.transit_kind === "skipped") return "â (skipped)";
+  if (r.transit_kind === "first") return "â (first)";
+  if (r.transit == null) return "â";
+  if (r.transit_kind === "overlap") return r.transit.toFixed(0) + "m â ";
   if (r.transit_kind === "shift_break") return Math.round(r.transit) + "m (break)";
   if (r.transit_kind === "intra") return r.transit.toFixed(0) + "m";
-  return "—";
+  return "â";
 }
 function renderTable(rows) {
   const data = rows.map(r => [
     r.tl, r.al, r.mt, r.atype, r.ast, r.loc,
     r.proper ? "Yes" : "No",
-    r.eng != null ? r.eng + "%" : "—",
-    r.prod != null ? r.prod + "%" : "—",
-    r.resp != null ? r.resp.toFixed(0) + "m" : "—",
-    r.dur != null ? r.dur.toFixed(0) + "m" : "—",
+    r.eng != null ? r.eng + "%" : "â",
+    r.prod != null ? r.prod + "%" : "â",
+    r.resp != null ? r.resp.toFixed(0) + "m" : "â",
+    r.dur != null ? r.dur.toFixed(0) + "m" : "â",
     transitDisplay(r),
-    r.ot == null ? "—" : (r.ot ? "On time" : "Late"),
+    r.ot == null ? "â" : (r.ot ? "On time" : "Late"),
     r.ma, r.tarr, r.ms, r.mc, r.fd, r.inb, r.outb,
   ]);
   const target = document.getElementById("tbl");
@@ -1290,7 +1290,7 @@ function switchTab(name) {
   // proper dimensions now that they're visible.
   setTimeout(() => {
     Object.values(charts).forEach(c => { try { c.resize(); } catch (e) {} });
-    // For tabs whose charts may have rendered at 0×0, re-run the full render
+    // For tabs whose charts may have rendered at 0Ã0, re-run the full render
     // pass once visible. Cheap (in-memory) and guarantees correct sizing.
     rerenderAll();
   }, 50);
@@ -1369,7 +1369,7 @@ function init() {
     // Add a small "watching for new data" indicator at the bottom-right
     const banner = document.createElement("div");
     banner.className = "wall-banner";
-    banner.innerHTML = '<span class="pulse"></span><span>LIVE · checking for new data every ' + _refreshSec + 's · <span id="wall-stamp"></span></span>';
+    banner.innerHTML = '<span class="pulse"></span><span>LIVE Â· checking for new data every ' + _refreshSec + 's Â· <span id="wall-stamp"></span></span>';
     document.body.appendChild(banner);
     document.getElementById("wall-stamp").textContent = SNAPSHOT_TIME;
 
@@ -1383,7 +1383,7 @@ function init() {
         if (m && m[1] !== SNAPSHOT_TIME) {
           location.reload();
         }
-      } catch (e) { /* network blip — ignore, keep showing current data */ }
+      } catch (e) { /* network blip â ignore, keep showing current data */ }
     }, _refreshSec * 1000);
   }
 }
@@ -1391,8 +1391,8 @@ document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 
-<div class="tab-panel" id="panel-financing" style="padding:0;">
-  <iframe src="financing.html" style="width:100%;height:calc(100vh - 120px);border:none;display:block;" loading="lazy"></iframe>
+<div class="tab-panel" id="panel-financing" style="padding:0;overflow:hidden;">
+  <iframe src="financing.html?v=2" style="width:100%;height:calc(100vh - 112px);border:none;display:block;overflow-y:auto;" loading="lazy"></iframe>
 </div>
 <div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:#0b0f1a;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="background:#131929;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:48px 44px;width:380px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
@@ -1401,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", init);
     <div style="font-size:17px;font-weight:600;color:#e2e8f0;margin-bottom:36px;">Sullivan Rd Missions Dashboard</div>
     <input type="password" id="pw-input" placeholder="Password" autofocus style="width:100%;box-sizing:border-box;padding:13px 16px;background:#0b0f1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-size:15px;outline:none;margin-bottom:12px;" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()" style="width:100%;padding:13px;background:#2563eb;border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Access Dashboard</button>
-    <div id="pw-error" style="color:#f87171;font-size:13px;margin-top:12px;visibility:hidden;">Incorrect password — please try again.</div>
+    <div id="pw-error" style="color:#f87171;font-size:13px;margin-top:12px;visibility:hidden;">Incorrect password â please try again.</div>
   </div>
 </div>
 <script>
