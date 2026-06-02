@@ -3,10 +3,23 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Financing - Mainline Aviation</title>
+<title>Financing | Mainline Aviation</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
+.page-title{font-size:20px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
+.page-sub{font-size:13px;color:#64748b;margin-bottom:24px;}
+.airline-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.atab{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:all 0.15s;background:#131826;}
+.atab:hover{border-color:rgba(255,255,255,0.15);}
+.atab.active{border-color:rgba(255,255,255,0.25);background:#1e2a3a;}
+.atab .dot{width:10px;height:10px;border-radius:50%;}
+.atab .aname{font-size:13px;font-weight:600;color:#e8eef5;}
+.atab .atotal{font-size:12px;color:#64748b;}
+.atab .abadge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;color:#fff;}
+.panel{display:none;}
+.panel.active{display:block;}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px;}
 .kpi{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;}
 .kpi .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;}
@@ -15,7 +28,7 @@
 .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#475569;margin:24px 0 12px;}
 .card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;margin-bottom:16px;}
 h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
-.chart-wrap{height:240px;position:relative;}
+.chart-wrap{height:220px;position:relative;}
 .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
 .filters label{font-size:12px;color:#64748b;font-weight:500;}
 .filters select{background:#0f1623;border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eef5;padding:5px 10px;font-size:12px;outline:none;}
@@ -35,27 +48,88 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 .green{color:#34d399;font-weight:600;}
 .leads{display:flex;flex-wrap:wrap;gap:5px;}
 .chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;font-size:12px;color:#cbd5e1;}
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-state .icon{font-size:32px;margin-bottom:12px;opacity:0.3;}
+.empty-state .msg{font-size:15px;font-weight:600;color:#475569;margin-bottom:6px;}
+.empty-state .sub{font-size:13px;color:#334155;}
 </style>
 </head>
 <body>
-<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 18px;background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="background:#C41E3A;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:800;color:#fff;letter-spacing:0.06em;">VS</div><div><div style="font-size:16px;font-weight:700;color:#e8eef5;">Virgin Atlantic</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Supplier Invoice Report &mdash; May 2026 &middot; ATL Hub</div></div></div><div class="kpis" id="kpis"></div>
-<div class="section-title">Daily Food Cost - May 2026</div>
-<div class="card"><h3>Total Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
-<div class="section-title">Virgin Atlantic &mdash; Cost Breakdown (All 20 Flights)</div>
-<div class="filters">
-  <label>Flight:</label>
-  <select id="fF" onchange="render()"><option value="">All</option><option value="104">V104 - ATL to LHR</option><option value="110">V110 - ATL to MAN</option></select>
-  <label>Date:</label>
-  <select id="fD" onchange="render()"><option value="">All Dates</option></select>
-  <span class="info" id="info"></span>
+<div class="page-title">Airline Food Cost Financing</div>
+<div class="page-sub">Sullivan Rd Missions Dashboard &mdash; ATL Hub</div>
+
+<div class="airline-tabs">
+  <div class="atab active" onclick="switchAirline('vs')">
+    <div class="dot" style="background:#C41E3A;"></div>
+    <div><div class="aname">Virgin Atlantic</div><div class="atotal" id="vs-total">Loading...</div></div>
+    <span class="abadge" style="background:#C41E3A;">VS</span>
+  </div>
+  <div class="atab" onclick="switchAirline('aa')">
+    <div class="dot" style="background:#0078D7;"></div>
+    <div><div class="aname">American Airlines</div><div class="atotal">No data yet</div></div>
+    <span class="abadge" style="background:#0078D7;">AA</span>
+  </div>
+  <div class="atab" onclick="switchAirline('et')">
+    <div class="dot" style="background:#007A4D;"></div>
+    <div><div class="aname">Ethiopian Airlines</div><div class="atotal">No data yet</div></div>
+    <span class="abadge" style="background:#007A4D;">ET</span>
+  </div>
+  <div class="atab" onclick="switchAirline('sk')">
+    <div class="dot" style="background:#003F87;"></div>
+    <div><div class="aname">SAS Scandinavian</div><div class="atotal">No data yet</div></div>
+    <span class="abadge" style="background:#003F87;">SK</span>
+  </div>
 </div>
-<div class="tbl-wrap"><table>
-  <thead><tr><th>Date</th><th>Flight</th><th>Airline</th><th>Route</th><th>Team Lead(s)</th><th class="r">Food Cost</th></tr></thead>
-  <tbody id="tbody"></tbody>
-  <tfoot><tr><td colspan="5">Total</td><td class="r" id="ft"></td></tr></tfoot>
-</table></div>
+
+<!-- Virgin Atlantic Panel -->
+<div class="panel active" id="panel-vs">
+  <div class="kpis" id="vs-kpis"></div>
+  <div class="section-title">Daily Food Cost &mdash; May 2026</div>
+  <div class="card"><h3>Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="vs-chart"></canvas></div></div>
+  <div class="section-title">Cost Breakdown &mdash; All 20 Flights</div>
+  <div class="filters">
+    <label>Flight:</label>
+    <select id="vs-fF" onchange="renderVS()"><option value="">All</option><option value="104">V104 &mdash; ATL to LHR</option><option value="110">V110 &mdash; ATL to MAN</option></select>
+    <label>Date:</label>
+    <select id="vs-fD" onchange="renderVS()"><option value="">All Dates</option></select>
+    <span class="info" id="vs-info"></span>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Date</th><th>Flight</th><th>Airline</th><th>Route</th><th>Team Lead(s)</th><th class="r">Food Cost</th></tr></thead>
+    <tbody id="vs-tbody"></tbody>
+    <tfoot><tr><td colspan="5">Total</td><td class="r" id="vs-ft"></td></tr></tfoot>
+  </table></div>
+</div>
+
+<!-- American Airlines Panel -->
+<div class="panel" id="panel-aa">
+  <div class="empty-state">
+    <div class="icon">&#9992;</div>
+    <div class="msg">No data uploaded for American Airlines</div>
+    <div class="sub">Upload an AA supplier invoice Excel sheet to populate this section</div>
+  </div>
+</div>
+
+<!-- Ethiopian Airlines Panel -->
+<div class="panel" id="panel-et">
+  <div class="empty-state">
+    <div class="icon">&#9992;</div>
+    <div class="msg">No data uploaded for Ethiopian Airlines</div>
+    <div class="sub">Upload an ET supplier invoice Excel sheet to populate this section</div>
+  </div>
+</div>
+
+<!-- SAS Panel -->
+<div class="panel" id="panel-sk">
+  <div class="empty-state">
+    <div class="icon">&#9992;</div>
+    <div class="msg">No data uploaded for SAS Scandinavian Airlines</div>
+    <div class="sub">Upload an SK supplier invoice Excel sheet to populate this section</div>
+  </div>
+</div>
+
 <script>
-var raw=[["2026-05-01","104","ATL-LHR",8549.55,["Bobbie Jackson III","Gabriel Silva Mane"]],
+var vsRaw=[["2026-05-01","104","ATL-LHR",8549.55,["Bobbie Jackson III","Gabriel Silva Mane"]],
   ["2026-05-01","110","ATL-MAN",6097.81,["Maurice Smith","Christian Lawson"]],
   ["2026-05-02","104","ATL-LHR",7696.54,["Abubakarr Sessay","Christian Lawson"]],
   ["2026-05-02","110","ATL-MAN",5747.35,["Bobbie Jackson III","Maurice Smith"]],
@@ -77,29 +151,42 @@ var raw=[["2026-05-01","104","ATL-LHR",8549.55,["Bobbie Jackson III","Gabriel Si
   ["2026-05-10","110","ATL-MAN",6047.14,["Claudette St. Juste","Maurice Smith"]]];
 function fmt(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fd(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
-var data=raw.map(function(r){return{date:r[0],ob:r[1],route:r[2],cost:r[3],leads:r[4]};});
-var dates=[...new Set(data.map(function(r){return r.date;}))].sort();
-dates.forEach(function(d){var o=document.createElement("option");o.value=d;o.textContent=fd(d);document.getElementById("fD").appendChild(o);});
-var gt=data.reduce(function(s,r){return s+r.cost;},0);
-var v104t=data.filter(function(r){return r.ob==="104";}).reduce(function(s,r){return s+r.cost;},0);
-var v110t=data.filter(function(r){return r.ob==="110";}).reduce(function(s,r){return s+r.cost;},0);
-
-document.getElementById("kpis").innerHTML="<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gt)+"</div><div class='delta'>May 1-10 V104 + V110</div></div><div class='kpi'><div class='label'>V104 Total</div><div class='value'>"+fmt(v104t)+"</div><div class='delta'>ATL to LHR - 10 flights</div></div><div class='kpi'><div class='label'>V110 Total</div><div class='value'>"+fmt(v110t)+"</div><div class='delta'>ATL to MAN - 10 flights</div></div>";
-new Chart(document.getElementById("chart"),{type:"bar",data:{labels:dates.map(function(d){return fd(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:dates.map(function(d){return(data.find(function(r){return r.date===d&&r.ob==="104";})||{cost:0}).cost;}),backgroundColor:"rgba(96,165,250,0.75)",borderRadius:4},{label:"V110 ATL-MAN",data:dates.map(function(d){return(data.find(function(r){return r.date===d&&r.ob==="110";})||{cost:0}).cost;}),backgroundColor:"rgba(52,211,153,0.75)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
-function render(){
-  var flt=document.getElementById("fF").value,fdt=document.getElementById("fD").value;
-  var rows=data.filter(function(r){return(!flt||r.ob===flt)&&(!fdt||r.date===fdt);});
+var vsData=vsRaw.map(function(r){return{date:r[0],ob:r[1],route:r[2],cost:r[3],leads:r[4]};});
+var gt=vsData.reduce(function(s,r){return s+r.cost;},0);
+var v104t=vsData.filter(function(r){return r.ob==="104";}).reduce(function(s,r){return s+r.cost;},0);
+var v110t=vsData.filter(function(r){return r.ob==="110";}).reduce(function(s,r){return s+r.cost;},0);
+document.getElementById("vs-total").textContent=fmt(gt);
+document.getElementById("vs-kpis").innerHTML=
+  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gt)+"</div><div class='delta'>May 1-10 &mdash; V104 + V110</div></div>"+
+  "<div class='kpi'><div class='label'>V104 &mdash; ATL to LHR</div><div class='value'>"+fmt(v104t)+"</div><div class='delta'>10 departures</div></div>"+
+  "<div class='kpi'><div class='label'>V110 &mdash; ATL to MAN</div><div class='value'>"+fmt(v110t)+"</div><div class='delta'>10 departures</div></div>";
+var dates=[...new Set(vsData.map(function(r){return r.date;}))].sort();
+dates.forEach(function(d){var o=document.createElement("option");o.value=d;o.textContent=fd(d);document.getElementById("vs-fD").appendChild(o);});
+var vsChart=null;
+(function(){
+  var cd=dates;
+  vsChart=new Chart(document.getElementById("vs-chart"),{type:"bar",data:{labels:cd.map(function(d){return fd(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:cd.map(function(d){return(vsData.find(function(r){return r.date===d&&r.ob==="104";})||{cost:0}).cost;}),backgroundColor:"rgba(196,30,58,0.7)",borderRadius:4},{label:"V110 ATL-MAN",data:cd.map(function(d){return(vsData.find(function(r){return r.date===d&&r.ob==="110";})||{cost:0}).cost;}),backgroundColor:"rgba(196,30,58,0.35)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
+})();
+function renderVS(){
+  var flt=document.getElementById("vs-fF").value,fdt=document.getElementById("vs-fD").value;
+  var rows=vsData.filter(function(r){return(!flt||r.ob===flt)&&(!fdt||r.date===fdt);});
   var h2="",tc=0;
   rows.forEach(function(r){
     var bc=r.ob==="110"?"v110":"";tc+=r.cost;
     var lh=r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join("");
-    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.ob+"</span></td>" + "<td><span style='background:rgba(196,30,58,0.12);color:#fca5a5;font-size:11px;font-weight:700;padding:2px 9px;border-radius:4px;'>Virgin Atlantic</span></td><td class='dim'>"+r.route+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";
+    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.ob+"</span></td><td><span style='background:rgba(196,30,58,0.12);color:#fca5a5;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;'>Virgin Atlantic</span></td><td class='dim'>"+r.route+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";
   });
-  document.getElementById("tbody").innerHTML=h2;
-  document.getElementById("info").textContent=rows.length+" rows";
-  document.getElementById("ft").textContent=fmt(tc);
+  document.getElementById("vs-tbody").innerHTML=h2;
+  document.getElementById("vs-info").textContent=rows.length+" rows";
+  document.getElementById("vs-ft").textContent=fmt(tc);
 }
-render();
+renderVS();
+function switchAirline(code){
+  document.querySelectorAll(".atab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
+  event.currentTarget.classList.add("active");
+  document.getElementById("panel-"+code).classList.add("active");
+}
 </script>
 </body>
 </html>
