@@ -536,6 +536,7 @@ body.wall .wall-banner .pulse {
 }
 
 #panel-financing.active ~ * .filters, .wrap:has(#panel-financing.active) .filters { display: none !important; }
+#panel-financing > div:first-child { margin-top: 0 !important; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
@@ -1396,6 +1397,7 @@ document.addEventListener("DOMContentLoaded", init);
 <div class="tab-panel" id="panel-financing">
 <style id="fin-styles">
 #panel-financing { padding-top: 0 !important; }
+#vs-kpis { grid-template-columns: repeat(4, 1fr) !important; }
 #vs-fM, #vs-info, #panel-financing .filters, #panel-financing > .filters { display:none !important; }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
@@ -1444,8 +1446,8 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 .empty-state .msg{font-size:15px;font-weight:600;color:#475569;margin-bottom:6px;}
 .empty-state .sub{font-size:13px;color:#334155;}
 </style>
-<div id="fin-content" style="padding:24px;">
-<div class="airline-tabs">
+<div id="fin-content" style="padding:0 0 24px 0;">
+<div class="airline-tabs" style="justify-content:center;">
   <div class="atab active" onclick="switchAirline('vs')">
     <div class="dot" style="background:#C41E3A;"></div>
     <div><div class="aname">Virgin Atlantic</div><div class="atotal" id="vs-total">Loading...</div></div>
@@ -1471,12 +1473,7 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 <!-- Virgin Atlantic Panel -->
 <div class="panel active" id="panel-vs">
   <div class="kpis" id="vs-kpis"></div>
-  <div style="display:grid;grid-template-columns:1fr;margin-bottom:16px;">
-<div style="background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;">
-<div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;">Avg Cost / Mission</div>
-<div style="font-size:22px;font-weight:700;color:#34d399;margin-bottom:4px;">$2,519.06</div>
-<div style="font-size:12px;color:#64748b;">56 matched missions - May 2026</div>
-</div></div>
+  </div>
 <div class="section-title">Daily Food Cost &mdash; May 2026</div>
   <div class="card"><h3>Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="vs-chart"></canvas></div></div>
   <div class="section-title">Cost Breakdown &mdash; All 20 Flights</div>
