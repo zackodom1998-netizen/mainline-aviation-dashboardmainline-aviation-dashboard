@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <title>Mainline Aviation · Sullivan Rd Missions Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/gridjs@5.0.2/dist/gridjs.umd.js" integrity="sha384-/XXDzxe4FsGiAe50i/u9pY/Vy/uX654MHB1xoc1BJNnH1WXHhqHga9g3q5tF4gj7" crossorigin="anonymous"></script>
 <style>
 :root {
@@ -538,7 +537,6 @@ body.wall .wall-banner .pulse {
 #panel-financing.active ~ * .filters, .wrap:has(#panel-financing.active) .filters { display: none !important; }
 #panel-financing > div:first-child { margin-top: 0 !important; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -1394,97 +1392,10 @@ document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 
-<div class="tab-panel" id="panel-financing">
-<style id="fin-styles">
-#panel-financing { padding-top: 0 !important; }
-#vs-kpis { grid-template-columns: repeat(4, 1fr) !important; }
-#vs-fM, #vs-info, #panel-financing .filters, #panel-financing > .filters { display:none !important; }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
-.page-title{font-size:20px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
-.page-sub{font-size:13px;color:#64748b;margin-bottom:24px;}
-.airline-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
-.atab{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:all 0.15s;background:#131826;}
-.atab:hover{border-color:rgba(255,255,255,0.15);}
-.atab.active{border-color:rgba(255,255,255,0.25);background:#1e2a3a;}
-.atab .dot{width:10px;height:10px;border-radius:50%;}
-.atab .aname{font-size:13px;font-weight:600;color:#e8eef5;}
-.atab .atotal{font-size:12px;color:#64748b;}
-.atab .abadge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;color:#fff;}
-.panel{display:none;}
-.panel.active{display:block;}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px;}
-.kpi{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;}
-.kpi .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;}
-.kpi .value{font-size:22px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
-.kpi .delta{font-size:12px;color:#64748b;}
-.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#475569;margin:24px 0 12px;}
-.card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;margin-bottom:16px;}
-h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
-.chart-wrap{height:220px;position:relative;}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
-.filters label{font-size:12px;color:#64748b;font-weight:500;}
-.filters select{background:#0f1623;border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eef5;padding:5px 10px;font-size:12px;outline:none;}
-.info{font-size:12px;color:#64748b;margin-left:auto;}
-.tbl-wrap{border-radius:10px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-thead th{padding:10px 14px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;background:#131826;}
-thead th.r{text-align:right;}
-tbody tr{border-bottom:1px solid rgba(255,255,255,0.05);}
-tbody tr:hover{background:rgba(255,255,255,0.025);}
-tbody td{padding:10px 14px;vertical-align:middle;}
-tbody td.r{text-align:right;}tbody td.dim{color:#64748b;font-size:12px;}
-tfoot td{padding:10px 14px;font-weight:700;background:rgba(255,255,255,0.04);border-top:2px solid rgba(255,255,255,0.1);}
-tfoot td.r{text-align:right;color:#60a5fa;}
-.badge{display:inline-block;font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
-.badge.v110{background:rgba(52,211,153,0.15);color:#34d399;}
-.green{color:#34d399;font-weight:600;}
-.leads{display:flex;flex-wrap:wrap;gap:5px;}
-.chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;font-size:12px;color:#cbd5e1;}
-.empty-state{text-align:center;padding:60px 20px;}
-.empty-state .icon{font-size:32px;margin-bottom:12px;opacity:0.3;}
-.empty-state .msg{font-size:15px;font-weight:600;color:#475569;margin-bottom:6px;}
-.empty-state .sub{font-size:13px;color:#334155;}
-</style>
-<div id="fin-content" style="padding:0 0 24px 0;">
-<div class="airline-tabs" style="justify-content:center;">
-  <div class="atab active" onclick="switchAirline('vs')">
-    <div class="dot" style="background:#C41E3A;"></div>
-    <div><div class="aname">Virgin Atlantic</div><div class="atotal" id="vs-total">Loading...</div></div>
-    <span class="abadge" style="background:#C41E3A;">VS</span>
-  </div>
-  <div class="atab" onclick="switchAirline('aa')">
-    <div class="dot" style="background:#0078D7;"></div>
-    <div><div class="aname">American Airlines</div><div class="atotal">No data yet</div></div>
-    <span class="abadge" style="background:#0078D7;">AA</span>
-  </div>
-  <div class="atab" onclick="switchAirline('et')">
-    <div class="dot" style="background:#007A4D;"></div>
-    <div><div class="aname">Ethiopian Airlines</div><div class="atotal">No data yet</div></div>
-    <span class="abadge" style="background:#007A4D;">ET</span>
-  </div>
-  <div class="atab" onclick="switchAirline('sk')">
-    <div class="dot" style="background:#003F87;"></div>
-    <div><div class="aname">SAS Scandinavian</div><div class="atotal">No data yet</div></div>
-    <span class="abadge" style="background:#003F87;">SK</span>
-  </div>
+<div class="tab-panel" id="panel-financing" style="padding:0;">
+  <iframe src="financing.html" style="width:100%;height:calc(100vh - 112px);border:none;display:block;" loading="lazy"></iframe>
 </div>
 
-<!-- Virgin Atlantic Panel -->
-<div class="panel active" id="panel-vs">
-  <div class="kpis" id="vs-kpis"></div>
-  </div>
-<div style="background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;margin-bottom:16px;"><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;">Avg Cost / Mission</div><div style="font-size:22px;font-weight:700;color:#34d399;margin-bottom:4px;">$2,519.06</div><div style="font-size:12px;color:#64748b;">56 matched missions - May 2026</div></div>
-<div class="section-title">Daily Food Cost &mdash; May 2026</div>
-  <div class="card"><h3>Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="vs-chart"></canvas></div></div>
-  <div class="section-title">Cost Breakdown &mdash; All 20 Flights</div>
-  
-  <div class="tbl-wrap"><table>
-    <thead><tr><th>Date</th><th>Flight</th><th>Airline</th><th>Route</th><th>Team Lead(s)</th><th class="r">Food Cost</th></tr></thead>
-    <tbody id="vs-tbody"></tbody>
-    <tfoot><tr><td colspan="5">Total</td><td class="r" id="vs-ft"></td></tr></tfoot>
-  </table></div>
-</div>
 <!-- American Airlines Panel -->
 
 <div class="panel" id="panel-aa">
