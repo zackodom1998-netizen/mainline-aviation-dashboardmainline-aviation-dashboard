@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Financing | Mainline Aviation</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
@@ -25,6 +26,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;}
 .kpi .value{font-size:22px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
 .kpi .delta{font-size:12px;color:#64748b;}
+.kpi.up .value{color:#34d399;}
+.kpi.down .value{color:#f87171;}
 .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#475569;margin:24px 0 12px;}
 .card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;margin-bottom:16px;}
 h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
@@ -40,7 +43,8 @@ thead th.r{text-align:right;}
 tbody tr{border-bottom:1px solid rgba(255,255,255,0.05);}
 tbody tr:hover{background:rgba(255,255,255,0.025);}
 tbody td{padding:10px 14px;vertical-align:middle;}
-tbody td.r{text-align:right;}tbody td.dim{color:#64748b;font-size:12px;}
+tbody td.r{text-align:right;}
+tbody td.dim{color:#64748b;font-size:12px;}
 tfoot td{padding:10px 14px;font-weight:700;background:rgba(255,255,255,0.04);border-top:2px solid rgba(255,255,255,0.1);}
 tfoot td.r{text-align:right;color:#60a5fa;}
 .badge{display:inline-block;font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
@@ -48,51 +52,88 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 .green{color:#34d399;font-weight:600;}
 .leads{display:flex;flex-wrap:wrap;gap:5px;}
 .chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;font-size:12px;color:#cbd5e1;}
+/* Import bar */
+.import-bar{display:flex;align-items:center;gap:12px;margin-bottom:24px;background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 18px;}
+.import-bar .ib-label{font-size:13px;color:#94a3b8;flex:1;}
+.import-bar .ib-label span{font-weight:600;color:#e8eef5;}
+.btn-import{display:inline-flex;align-items:center;gap:7px;background:#1d4ed8;color:#fff;font-size:13px;font-weight:600;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;transition:background 0.15s;}
+.btn-import:hover{background:#2563eb;}
+.btn-import svg{width:15px;height:15px;flex-shrink:0;}
+.btn-clear{display:inline-flex;align-items:center;gap:6px;background:rgba(239,68,68,0.12);color:#f87171;font-size:12px;font-weight:600;padding:7px 13px;border-radius:7px;border:1px solid rgba(239,68,68,0.2);cursor:pointer;transition:all 0.15s;}
+.btn-clear:hover{background:rgba(239,68,68,0.22);}
+.week-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.2);}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 18px;font-size:13px;color:#e8eef5;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:9999;opacity:0;transform:translateY(10px);transition:all 0.25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-color:rgba(52,211,153,0.4);}
+.toast.error{border-color:rgba(248,113,113,0.4);}
+/* Empty state */
 .empty-state{text-align:center;padding:60px 20px;}
 .empty-state .icon{font-size:32px;margin-bottom:12px;opacity:0.3;}
 .empty-state .msg{font-size:15px;font-weight:600;color:#475569;margin-bottom:6px;}
-.empty-state .sub{font-size:13px;color:#334155;}
+.empty-state .sub{font-size:13px;color:#334155;margin-bottom:20px;}
+/* WoW section */
+.wow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+@media(max-width:700px){.wow-grid{grid-template-columns:1fr;}}
+.wow-stat{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 18px;}
+.wow-stat .ws-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:4px;}
+.wow-stat .ws-val{font-size:18px;font-weight:700;color:#e8eef5;}
+.wow-stat .ws-sub{font-size:12px;margin-top:3px;}
+.wow-stat .ws-sub.up{color:#34d399;}
+.wow-stat .ws-sub.down{color:#f87171;}
+.wow-stat .ws-sub.flat{color:#64748b;}
 </style>
 </head>
 <body>
+<div id="toast" class="toast"></div>
+<input type="file" id="file-input" accept=".xlsx,.xls" style="display:none"/>
+
 <div class="page-title">Airline Food Cost Financing</div>
 <div class="page-sub">Sullivan Rd Missions Dashboard &mdash; ATL Hub</div>
 
 <div class="airline-tabs">
-  <div class="atab active" onclick="switchAirline('vs')">
+  <div class="atab active" onclick="switchAirline('vs',this)">
     <div class="dot" style="background:#C41E3A;"></div>
     <div><div class="aname">Virgin Atlantic</div><div class="atotal" id="vs-total">Loading...</div></div>
     <span class="abadge" style="background:#C41E3A;">VS</span>
   </div>
-  <div class="atab" onclick="switchAirline('aa')">
+  <div class="atab" onclick="switchAirline('aa',this)">
     <div class="dot" style="background:#0078D7;"></div>
-    <div><div class="aname">American Airlines</div><div class="atotal">No data yet</div></div>
+    <div><div class="aname">American Airlines</div><div class="atotal" id="aa-total">No data yet</div></div>
     <span class="abadge" style="background:#0078D7;">AA</span>
   </div>
-  <div class="atab" onclick="switchAirline('et')">
+  <div class="atab" onclick="switchAirline('et',this)">
     <div class="dot" style="background:#007A4D;"></div>
-    <div><div class="aname">Ethiopian Airlines</div><div class="atotal">No data yet</div></div>
+    <div><div class="aname">Ethiopian Airlines</div><div class="atotal" id="et-total">No data yet</div></div>
     <span class="abadge" style="background:#007A4D;">ET</span>
   </div>
-  <div class="atab" onclick="switchAirline('sk')">
+  <div class="atab" onclick="switchAirline('sk',this)">
     <div class="dot" style="background:#003F87;"></div>
-    <div><div class="aname">SAS Scandinavian</div><div class="atotal">No data yet</div></div>
+    <div><div class="aname">SAS Scandinavian</div><div class="atotal" id="sk-total">No data yet</div></div>
     <span class="abadge" style="background:#003F87;">SK</span>
   </div>
 </div>
 
 <!-- Virgin Atlantic Panel -->
 <div class="panel active" id="panel-vs">
+  <div class="import-bar">
+    <div class="ib-label">Import a new weekly supplier invoice to add data. <span>Existing weeks are preserved for comparison.</span></div>
+    <button class="btn-clear" onclick="clearAirlineData('vs')" title="Clear all imported VS data">✕ Clear imported</button>
+    <button class="btn-import" onclick="triggerImport('vs')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+      Import Excel
+    </button>
+  </div>
   <div class="kpis" id="vs-kpis"></div>
-  <div class="section-title">Daily Food Cost &mdash; May 2026</div>
-  <div class="card"><h3>Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="vs-chart"></canvas></div></div>
-  <div class="section-title">Cost Breakdown &mdash; All 20 Flights</div>
+  <div id="vs-wow-section"></div>
+  <div class="section-title" id="vs-chart-title">Daily Food Cost</div>
+  <div class="card"><h3 id="vs-chart-h3">Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="vs-chart"></canvas></div></div>
+  <div class="section-title">Cost Breakdown</div>
   <div class="filters">
-    <label>Month:</label>
-    <select id="vs-fM" onchange="renderVS()">
-      <option value="">All</option>
-      <option value="2026-05" selected>May 2026</option>
-    </select>
+    <label>Week:</label>
+    <select id="vs-fW" onchange="renderPanel('vs')"><option value="">All weeks</option></select>
+    <label>Flight:</label>
+    <select id="vs-fF" onchange="renderPanel('vs')"><option value="">All</option></select>
     <span class="info" id="vs-info"></span>
   </div>
   <div class="tbl-wrap"><table>
@@ -104,33 +145,77 @@ tfoot td.r{text-align:right;color:#60a5fa;}
 
 <!-- American Airlines Panel -->
 <div class="panel" id="panel-aa">
-  <div class="empty-state">
-    <div class="icon">&#9992;</div>
-    <div class="msg">No data uploaded for American Airlines</div>
-    <div class="sub">Upload an AA supplier invoice Excel sheet to populate this section</div>
+  <div class="import-bar">
+    <div class="ib-label">Import a new weekly supplier invoice to add data. <span>Existing weeks are preserved for comparison.</span></div>
+    <button class="btn-clear" onclick="clearAirlineData('aa')" title="Clear all AA data" style="display:none" id="aa-clear-btn">✕ Clear imported</button>
+    <button class="btn-import" onclick="triggerImport('aa')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+      Import Excel
+    </button>
+  </div>
+  <div id="aa-content">
+    <div class="empty-state">
+      <div class="icon">&#9992;</div>
+      <div class="msg">No data uploaded for American Airlines</div>
+      <div class="sub">Click "Import Excel" above to upload a supplier invoice</div>
+      <button class="btn-import" onclick="triggerImport('aa')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+        Import Excel
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- Ethiopian Airlines Panel -->
 <div class="panel" id="panel-et">
-  <div class="empty-state">
-    <div class="icon">&#9992;</div>
-    <div class="msg">No data uploaded for Ethiopian Airlines</div>
-    <div class="sub">Upload an ET supplier invoice Excel sheet to populate this section</div>
+  <div class="import-bar">
+    <div class="ib-label">Import a new weekly supplier invoice to add data. <span>Existing weeks are preserved for comparison.</span></div>
+    <button class="btn-clear" onclick="clearAirlineData('et')" title="Clear all ET data" style="display:none" id="et-clear-btn">✕ Clear imported</button>
+    <button class="btn-import" onclick="triggerImport('et')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+      Import Excel
+    </button>
+  </div>
+  <div id="et-content">
+    <div class="empty-state">
+      <div class="icon">&#9992;</div>
+      <div class="msg">No data uploaded for Ethiopian Airlines</div>
+      <div class="sub">Click "Import Excel" above to upload a supplier invoice</div>
+      <button class="btn-import" onclick="triggerImport('et')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+        Import Excel
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- SAS Panel -->
 <div class="panel" id="panel-sk">
-  <div class="empty-state">
-    <div class="icon">&#9992;</div>
-    <div class="msg">No data uploaded for SAS Scandinavian Airlines</div>
-    <div class="sub">Upload an SK supplier invoice Excel sheet to populate this section</div>
+  <div class="import-bar">
+    <div class="ib-label">Import a new weekly supplier invoice to add data. <span>Existing weeks are preserved for comparison.</span></div>
+    <button class="btn-clear" onclick="clearAirlineData('sk')" title="Clear all SK data" style="display:none" id="sk-clear-btn">✕ Clear imported</button>
+    <button class="btn-import" onclick="triggerImport('sk')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+      Import Excel
+    </button>
+  </div>
+  <div id="sk-content">
+    <div class="empty-state">
+      <div class="icon">&#9992;</div>
+      <div class="msg">No data uploaded for SAS Scandinavian Airlines</div>
+      <div class="sub">Click "Import Excel" above to upload a supplier invoice</div>
+      <button class="btn-import" onclick="triggerImport('sk')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+        Import Excel
+      </button>
+    </div>
   </div>
 </div>
 
 <script>
-var vsRaw=[["2026-05-01","104","ATL-LHR",8549.55,["Bobbie Jackson III","Gabriel Silva Mane"]],
+// ─── Seed data (Virgin Atlantic May 2026) ────────────────────────────────────
+var VS_SEED = [
+  ["2026-05-01","104","ATL-LHR",8549.55,["Bobbie Jackson III","Gabriel Silva Mane"]],
   ["2026-05-01","110","ATL-MAN",6097.81,["Maurice Smith","Christian Lawson"]],
   ["2026-05-02","104","ATL-LHR",7696.54,["Abubakarr Sessay","Christian Lawson"]],
   ["2026-05-02","110","ATL-MAN",5747.35,["Bobbie Jackson III","Maurice Smith"]],
@@ -148,47 +233,344 @@ var vsRaw=[["2026-05-01","104","ATL-LHR",8549.55,["Bobbie Jackson III","Gabriel 
   ["2026-05-08","110","ATL-MAN",6033.51,["Christian Lawson","Bobbie Jackson III"]],
   ["2026-05-09","104","ATL-LHR",8219.44,["Maurice Smith","Gabriel Silva Mane"]],
   ["2026-05-09","110","ATL-MAN",6430.59,["Christian Lawson","Bobbie Jackson III"]],
-  ["2026-05-10","104","ATL-LHR",8233.1,["Gabriel Silva Mane","Rachel Lester"]],
-  ["2026-05-10","110","ATL-MAN",6047.14,["Claudette St. Juste","Maurice Smith"]]];
-function fmt(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fd(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
-var vsData=vsRaw.map(function(r){return{date:r[0],ob:r[1],route:r[2],cost:r[3],leads:r[4]};});
-var gt=vsData.reduce(function(s,r){return s+r.cost;},0);
-var v104t=vsData.filter(function(r){return r.ob==="104";}).reduce(function(s,r){return s+r.cost;},0);
-var v110t=vsData.filter(function(r){return r.ob==="110";}).reduce(function(s,r){return s+r.cost;},0);
-document.getElementById("vs-total").textContent=fmt(gt);
-document.getElementById("vs-kpis").innerHTML=
-  "<div class='kpi'><div class='label'>Total Food Cost</div><div class='value'>"+fmt(gt)+"</div><div class='delta'>May 1-10 &mdash; V104 + V110</div></div>"+
-  "<div class='kpi'><div class='label'>V104 &mdash; ATL to LHR</div><div class='value'>"+fmt(v104t)+"</div><div class='delta'>10 departures</div></div>"+
-  "<div class='kpi'><div class='label'>V110 &mdash; ATL to MAN</div><div class='value'>"+fmt(v110t)+"</div><div class='delta'>10 departures</div></div>"+
-  "<div class='kpi'><div class='label'>Avg Cost / Mission</div><div class='value'>"+fmt(gt/56)+"</div><div class='delta'>56 matched missions · May 2026</div></div>"+
-var dates=[...new Set(vsData.map(function(r){return r.date;}))].sort();
+  ["2026-05-10","104","ATL-LHR",8233.10,["Gabriel Silva Mane","Rachel Lester"]],
+  ["2026-05-10","110","ATL-MAN",6047.14,["Claudette St. Juste","Maurice Smith"]]
+];
 
-var vsChart=null;
-(function(){
-  var cd=dates;
-  vsChart=new Chart(document.getElementById("vs-chart"),{type:"bar",data:{labels:cd.map(function(d){return fd(d).replace(", 2026","");}),datasets:[{label:"V104 ATL-LHR",data:cd.map(function(d){return(vsData.find(function(r){return r.date===d&&r.ob==="104";})||{cost:0}).cost;}),backgroundColor:"rgba(196,30,58,0.7)",borderRadius:4},{label:"V110 ATL-MAN",data:cd.map(function(d){return(vsData.find(function(r){return r.date===d&&r.ob==="110";})||{cost:0}).cost;}),backgroundColor:"rgba(196,30,58,0.35)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#94a3b8"}},tooltip:{callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw);}}}},scales:{x:{ticks:{color:"#64748b"},grid:{color:"rgba(255,255,255,0.05)"}},y:{ticks:{color:"#64748b",callback:function(v){return "$"+v.toLocaleString();}},grid:{color:"rgba(255,255,255,0.05)"}}}}});
-})();
-function renderVS(){
-  var fmo=document.getElementById("vs-fM").value;
-  var rows=vsData.filter(function(r){return(!fmo||r.date.startsWith(fmo));});
-  var h2="",tc=0;
-  rows.forEach(function(r){
-    var bc=r.ob==="110"?"v110":"";tc+=r.cost;
-    var lh=r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join("");
-    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.ob+"</span></td><td><span style='background:rgba(196,30,58,0.12);color:#fca5a5;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;'>Virgin Atlantic</span></td><td class='dim'>"+r.route+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";
+var AIRLINE_COLORS = {
+  vs: '#C41E3A', aa: '#0078D7', et: '#007A4D', sk: '#003F87'
+};
+var AIRLINE_NAMES = {
+  vs: 'Virgin Atlantic', aa: 'American Airlines', et: 'Ethiopian Airlines', sk: 'SAS Scandinavian'
+};
+
+var charts = {};
+var importTarget = null;
+
+function fmt(n){return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fd(s){return new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
+
+function weekLabel(dateStr){
+  var d = new Date(dateStr+"T12:00:00");
+  var day = d.getDay();
+  var diff = (day === 0) ? -6 : 1 - day;
+  var mon = new Date(d);
+  mon.setDate(d.getDate() + diff);
+  return "Week of " + mon.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+}
+function weekKey(dateStr){
+  var d = new Date(dateStr+"T12:00:00");
+  var day = d.getDay();
+  var diff = (day === 0) ? -6 : 1 - day;
+  var mon = new Date(d);
+  mon.setDate(d.getDate() + diff);
+  return mon.toISOString().slice(0,10);
+}
+
+function showToast(msg, type){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type||'');
+  setTimeout(function(){ t.className = 'toast'; }, 3500);
+}
+
+function loadData(airline){
+  try { return JSON.parse(localStorage.getItem('fin_'+airline) || 'null'); } catch(e){ return null; }
+}
+function saveData(airline, data){
+  localStorage.setItem('fin_'+airline, JSON.stringify(data));
+}
+function clearAirlineData(airline){
+  if(!confirm('Clear all imported data for ' + AIRLINE_NAMES[airline] + '? Seed data (VS only) will be restored.')) return;
+  localStorage.removeItem('fin_'+airline);
+  initPanel(airline);
+  showToast('Cleared imported data for ' + AIRLINE_NAMES[airline], '');
+}
+
+function getAirlineData(airline){
+  var stored = loadData(airline);
+  if(stored) return stored;
+  if(airline === 'vs'){
+    return VS_SEED.map(function(r){
+      return {date:r[0], flight:r[1], route:r[2], cost:r[3], leads:r[4], week:weekKey(r[0])};
+    });
+  }
+  return [];
+}
+
+function triggerImport(airline){
+  importTarget = airline;
+  var fi = document.getElementById('file-input');
+  fi.value = '';
+  fi.click();
+}
+
+document.getElementById('file-input').addEventListener('change', function(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var airline = importTarget;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      var wb = XLSX.read(ev.target.result, {type:'array', cellDates:true});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {raw:false, defval:''});
+      if(!rows.length){ showToast('No rows found in file.', 'error'); return; }
+      var sample = rows[0];
+      var keys = Object.keys(sample);
+      function findCol(patterns){
+        for(var i=0;i<patterns.length;i++){
+          var p = patterns[i].toLowerCase();
+          for(var j=0;j<keys.length;j++){
+            if(keys[j].toLowerCase().replace(/[\s_.]/g,'').indexOf(p.replace(/[\s_.]/g,'')) >= 0) return keys[j];
+          }
+        }
+        return null;
+      }
+      var colDate   = findCol(['flight date','date']);
+      var colFlight = findCol(['flight no','flight number','flightno','flight']);
+      var colSub    = findCol(['subtotal','sub total','food cost','cost']);
+      var colRoute  = findCol(['route','destination']);
+      if(!colDate || !colFlight || !colSub){
+        showToast('Could not find required columns (FLIGHT DATE, FLIGHT NO., SUBTOTAL). Check file format.', 'error');
+        return;
+      }
+      var grouped = {};
+      rows.forEach(function(r){
+        var rawDate = r[colDate];
+        if(!rawDate) return;
+        var dateStr = '';
+        if(rawDate instanceof Date){
+          dateStr = rawDate.toISOString().slice(0,10);
+        } else {
+          var d = new Date(rawDate);
+          if(!isNaN(d)) {
+            dateStr = d.toISOString().slice(0,10);
+          } else {
+            var parts = String(rawDate).split(/[\/\-\.]/)
+            if(parts.length===3){
+              var y = parts[2].length===4?parts[2]:'20'+parts[2];
+              var m = parts[1].length===1?'0'+parts[1]:parts[1];
+              var day = parts[0].length===1?'0'+parts[0]:parts[0];
+              dateStr = y+'-'+m+'-'+day;
+            }
+          }
+        }
+        if(!dateStr || isNaN(new Date(dateStr))) return;
+        var rawFlight = String(r[colFlight]).trim().replace(/^V/i,'');
+        var cost = parseFloat(String(r[colSub]).replace(/[^0-9.\-]/g,'')) || 0;
+        var route = colRoute ? String(r[colRoute]).trim() : '';
+        var key = dateStr + '|' + rawFlight;
+        if(!grouped[key]){
+          grouped[key] = {date:dateStr, flight:rawFlight, route:route, cost:0, leads:[], week:weekKey(dateStr)};
+        }
+        grouped[key].cost += cost;
+        if(route && !grouped[key].route) grouped[key].route = route;
+      });
+      var newRows = Object.values(grouped).filter(function(r){ return r.cost > 0; });
+      if(!newRows.length){ showToast('No valid cost rows found after parsing.', 'error'); return; }
+      var existing = getAirlineData(airline);
+      var existingKeys = {};
+      existing.forEach(function(r){ existingKeys[r.date+'|'+r.flight] = true; });
+      var added = 0, replaced = 0;
+      newRows.forEach(function(r){
+        var k = r.date+'|'+r.flight;
+        if(existingKeys[k]) replaced++; else added++;
+      });
+      var newKeys = {};
+      newRows.forEach(function(r){ newKeys[r.date+'|'+r.flight] = true; });
+      var merged = existing.filter(function(r){ return !newKeys[r.date+'|'+r.flight]; }).concat(newRows);
+      merged.sort(function(a,b){ return a.date.localeCompare(b.date)||a.flight.localeCompare(b.flight); });
+      saveData(airline, merged);
+      initPanel(airline);
+      var msg = '✓ Imported '+newRows.length+' flight records';
+      if(added) msg += ' ('+added+' new';
+      if(replaced) msg += (added?', ':' (')+replaced+' updated';
+      if(added||replaced) msg += ')';
+      showToast(msg, 'success');
+    } catch(err){
+      showToast('Error reading file: '+err.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function buildWeekOptions(selectId, data){
+  var sel = document.getElementById(selectId);
+  if(!sel) return;
+  var weeks = {};
+  data.forEach(function(r){ weeks[r.week] = weekLabel(r.week); });
+  var sorted = Object.keys(weeks).sort();
+  var current = sel.value;
+  sel.innerHTML = '<option value="">All weeks</option>';
+  sorted.forEach(function(w){
+    var opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = weeks[w];
+    if(w === current) opt.selected = true;
+    sel.appendChild(opt);
   });
-  document.getElementById("vs-tbody").innerHTML=h2;
-  document.getElementById("vs-info").textContent=rows.length+" rows";
-  document.getElementById("vs-ft").textContent=fmt(tc);
 }
-renderVS();
-function switchAirline(code){
-  document.querySelectorAll(".atab").forEach(function(t){t.classList.remove("active");});
-  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
-  event.currentTarget.classList.add("active");
-  document.getElementById("panel-"+code).classList.add("active");
+
+function buildFlightOptions(selectId, data){
+  var sel = document.getElementById(selectId);
+  if(!sel) return;
+  var flights = [...new Set(data.map(function(r){return r.flight;}))].sort();
+  var current = sel.value;
+  sel.innerHTML = '<option value="">All</option>';
+  flights.forEach(function(f){
+    var opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = 'V'+f;
+    if(f === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
 }
+
+function renderWoW(containerId, data, color){
+  var el = document.getElementById(containerId);
+  if(!el) return;
+  var byWeek = {};
+  data.forEach(function(r){
+    if(!byWeek[r.week]) byWeek[r.week] = {total:0, count:0, label:weekLabel(r.week)};
+    byWeek[r.week].total += r.cost;
+    byWeek[r.week].count++;
+  });
+  var weeks = Object.keys(byWeek).sort();
+  if(weeks.length < 2){ el.innerHTML=''; return; }
+  var prev = byWeek[weeks[weeks.length-2]];
+  var curr = byWeek[weeks[weeks.length-1]];
+  var diff = curr.total - prev.total;
+  var pct = prev.total ? ((diff/prev.total)*100) : 0;
+  var arrow = diff >= 0 ? '↑' : '↓';
+  var cls = diff > 0 ? 'down' : (diff < 0 ? 'up' : 'flat');
+  var pctStr = (diff>=0?'+':'')+pct.toFixed(1)+'%';
+  var flightNums = [...new Set(data.map(function(r){return r.flight;}))].sort();
+  var datasets = flightNums.map(function(f, i){
+    return {
+      label: 'V'+f,
+      data: weeks.map(function(w){
+        return data.filter(function(r){return r.week===w&&r.flight===f;})
+                   .reduce(function(s,r){return s+r.cost;},0);
+      }),
+      backgroundColor: i===0 ? color+'cc' : color+'66',
+      borderRadius: 4
+    };
+  });
+  el.innerHTML =
+    '<div class="section-title">Week-over-Week Comparison</div>'+
+    '<div class="wow-grid">'+
+      '<div class="wow-stat"><div class="ws-label">'+curr.label+'</div>'+
+        '<div class="ws-val">'+fmt(curr.total)+'</div>'+
+        '<div class="ws-sub '+cls+'">'+arrow+' '+pctStr+' vs '+prev.label+'</div></div>'+
+      '<div class="wow-stat"><div class="ws-label">'+prev.label+' (prior)</div>'+
+        '<div class="ws-val" style="color:#64748b">'+fmt(prev.total)+'</div>'+
+        '<div class="ws-sub flat">'+prev.count+' flights</div></div>'+
+    '</div>'+
+    '<div class="card"><h3>Weekly Total by Flight</h3><div class="chart-wrap"><canvas id="'+containerId+'-wchart"></canvas></div></div>';
+  setTimeout(function(){
+    var ctx = document.getElementById(containerId+'-wchart');
+    if(!ctx) return;
+    new Chart(ctx, {
+      type:'bar',
+      data:{labels: weeks.map(function(w){ return weekLabel(w).replace('Week of ',''); }),datasets: datasets},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:'#94a3b8'}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}},
+        scales:{x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#64748b',callback:function(v){return '$'+v.toLocaleString();}},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  }, 50);
+}
+
+function renderVSPanel(data){
+  var color = AIRLINE_COLORS.vs;
+  var gt = data.reduce(function(s,r){return s+r.cost;},0);
+  var weeks = [...new Set(data.map(function(r){return r.week;}))].sort();
+  var flights = [...new Set(data.map(function(r){return r.flight;}))].sort();
+  document.getElementById('vs-total').textContent = fmt(gt);
+  var kpiHtml = '<div class="kpi"><div class="label">Total Food Cost (All Weeks)</div><div class="value">'+fmt(gt)+'</div><div class="delta">'+weeks.length+' week'+(weeks.length!==1?'s':'')+' · '+data.length+' flights</div></div>';
+  flights.forEach(function(f){
+    var ft = data.filter(function(r){return r.flight===f;}).reduce(function(s,r){return s+r.cost;},0);
+    var fc = data.filter(function(r){return r.flight===f;}).length;
+    kpiHtml += '<div class="kpi"><div class="label">V'+f+'</div><div class="value">'+fmt(ft)+'</div><div class="delta">'+fc+' departures</div></div>';
+  });
+  kpiHtml += '<div class="kpi"><div class="label">Avg Cost / Flight</div><div class="value">'+fmt(gt/data.length)+'</div><div class="delta">across all weeks</div></div>';
+  document.getElementById('vs-kpis').innerHTML = kpiHtml;
+  renderWoW('vs-wow-section', data, color);
+  var selWeek = document.getElementById('vs-fW').value;
+  var selFlight = document.getElementById('vs-fF').value;
+  var filtered = data.filter(function(r){return (!selWeek||r.week===selWeek)&&(!selFlight||r.flight===selFlight);});
+  var dates = [...new Set(filtered.map(function(r){return r.date;}))].sort();
+  var flightsFiltered = selFlight ? [selFlight] : flights;
+  if(charts['vs']){ charts['vs'].destroy(); }
+  var ctx = document.getElementById('vs-chart');
+  if(ctx){
+    charts['vs'] = new Chart(ctx,{type:'bar',data:{labels:dates.map(function(d){return fd(d).replace(/, \d{4}/,'');}),datasets:flightsFiltered.map(function(f,i){return {label:'V'+f,data:dates.map(function(d){var row=filtered.find(function(r){return r.date===d&&r.flight===f;});return row?row.cost:0;}),backgroundColor:i===0?color+'cc':color+'55',borderRadius:4};})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8'}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}},scales:{x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#64748b',callback:function(v){return '$'+v.toLocaleString();}},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  }
+  var h2='',tc=0;
+  filtered.forEach(function(r){
+    var bc=flights.indexOf(r.flight)>0?'v110':'';
+    tc+=r.cost;
+    var lh=r.leads&&r.leads.length?r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join(""):"<span class='chip' style='color:#475569'>—</span>";
+    h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.flight+"</span></td><td><span style='background:rgba(196,30,58,0.12);color:#fca5a5;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;'>Virgin Atlantic</span></td><td class='dim'>"+(r.route||'—')+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";
+  });
+  document.getElementById('vs-tbody').innerHTML=h2||"<tr><td colspan='6' style='text-align:center;color:#475569;padding:30px'>No rows match filters</td></tr>";
+  document.getElementById('vs-info').textContent=filtered.length+' rows';
+  document.getElementById('vs-ft').textContent=fmt(tc);
+}
+
+function renderGenericPanel(airline,data){
+  var color=AIRLINE_COLORS[airline],name=AIRLINE_NAMES[airline];
+  var contentEl=document.getElementById(airline+'-content');
+  var clearBtn=document.getElementById(airline+'-clear-btn');
+  if(clearBtn) clearBtn.style.display='inline-flex';
+  var gt=data.reduce(function(s,r){return s+r.cost;},0);
+  var weeks=[...new Set(data.map(function(r){return r.week;}))].sort();
+  var flights=[...new Set(data.map(function(r){return r.flight;}))].sort();
+  document.getElementById(airline+'-total').textContent=fmt(gt);
+  var kpiHtml='<div class="kpis"><div class="kpi"><div class="label">Total Food Cost (All Weeks)</div><div class="value">'+fmt(gt)+'</div><div class="delta">'+weeks.length+' week'+(weeks.length!==1?'s':'')+' · '+data.length+' flights</div></div>';
+  flights.forEach(function(f){var ft=data.filter(function(r){return r.flight===f;}).reduce(function(s,r){return s+r.cost;},0);var fc=data.filter(function(r){return r.flight===f;}).length;kpiHtml+='<div class="kpi"><div class="label">'+f+'</div><div class="value">'+fmt(ft)+'</div><div class="delta">'+fc+' departures</div></div>';});
+  kpiHtml+='<div class="kpi"><div class="label">Avg Cost / Flight</div><div class="value">'+fmt(gt/data.length)+'</div><div class="delta">across all weeks</div></div></div>';
+  var wowId=airline+'-wow';
+  var selWeek='',selFlight='';
+  var ew=document.getElementById(airline+'-fW'),ef=document.getElementById(airline+'-fF');
+  if(ew) selWeek=ew.value; if(ef) selFlight=ef.value;
+  var weekOpts='<option value="">All weeks</option>';
+  weeks.forEach(function(w){weekOpts+='<option value="'+w+'"'+(w===selWeek?' selected':'')+'>'+weekLabel(w)+'</option>';});
+  var flightOpts='<option value="">All</option>';
+  flights.forEach(function(f){flightOpts+='<option value="'+f+'"'+(f===selFlight?' selected':'')+'>'+f+'</option>';});
+  var filtered=data.filter(function(r){return(!selWeek||r.week===selWeek)&&(!selFlight||r.flight===selFlight);});
+  var dates=[...new Set(filtered.map(function(r){return r.date;}))].sort();
+  var flightsF=selFlight?[selFlight]:flights;
+  var tableRows='',tc=0;
+  filtered.forEach(function(r){tc+=r.cost;var lh=r.leads&&r.leads.length?r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join(""):"<span class='chip' style='color:#475569'>—</span>";tableRows+="<tr><td>"+fd(r.date)+"</td><td><span class='badge'>"+r.flight+"</span></td><td><span style='background:rgba(99,102,241,0.12);color:#a5b4fc;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;'>"+name+"</span></td><td class='dim'>"+(r.route||'—')+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";});
+  contentEl.innerHTML=kpiHtml+'<div id="'+wowId+'"></div><div class="section-title">Daily Food Cost</div><div class="card"><h3>Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="'+airline+'-chart"></canvas></div></div><div class="section-title">Cost Breakdown</div><div class="filters"><label>Week:</label><select id="'+airline+'-fW" onchange="renderPanel(\''+airline+'\')">' +weekOpts+'</select><label>Flight:</label><select id="'+airline+'-fF" onchange="renderPanel(\''+airline+'\')">' +flightOpts+'</select><span class="info" id="'+airline+'-info">'+filtered.length+' rows</span></div><div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Flight</th><th>Airline</th><th>Route</th><th>Team Lead(s)</th><th class="r">Food Cost</th></tr></thead><tbody>'+(tableRows||"<tr><td colspan='6' style='text-align:center;color:#475569;padding:30px'>No rows match filters</td></tr>")+'</tbody><tfoot><tr><td colspan="5">Total</td><td class="r" style="color:#60a5fa">'+fmt(tc)+'</td></tr></tfoot></table></div>';
+  renderWoW(wowId,data,color);
+  setTimeout(function(){var ctx=document.getElementById(airline+'-chart');if(!ctx)return;if(charts[airline])charts[airline].destroy();charts[airline]=new Chart(ctx,{type:'bar',data:{labels:dates.map(function(d){return fd(d).replace(/, \d{4}/,'');}),datasets:flightsF.map(function(f,i){return{label:f,data:dates.map(function(d){var row=filtered.find(function(r){return r.date===d&&r.flight===f;});return row?row.cost:0;}),backgroundColor:i===0?color+'cc':color+'55',borderRadius:4};})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8'}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}},scales:{x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#64748b',callback:function(v){return '$'+v.toLocaleString();}},grid:{color:'rgba(255,255,255,0.05)'}}}}});},50);
+}
+
+function initPanel(airline){
+  var data=getAirlineData(airline);
+  if(airline==='vs'){buildWeekOptions('vs-fW',data);buildFlightOptions('vs-fF',data);renderVSPanel(data);}
+  else if(data.length>0){renderGenericPanel(airline,data);}
+  else{
+    document.getElementById(airline+'-total').textContent='No data yet';
+    var cb=document.getElementById(airline+'-clear-btn');if(cb)cb.style.display='none';
+    document.getElementById(airline+'-content').innerHTML='<div class="empty-state"><div class="icon">&#9992;</div><div class="msg">No data uploaded for '+AIRLINE_NAMES[airline]+'</div><div class="sub">Click "Import Excel" above to upload a supplier invoice</div><button class="btn-import" onclick="triggerImport(\''+airline+'\')">'+'<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>Import Excel</button></div>';
+  }
+}
+
+function renderPanel(airline){
+  var data=getAirlineData(airline);
+  if(airline==='vs'){renderVSPanel(data);}else if(data.length>0){renderGenericPanel(airline,data);}
+}
+
+function switchAirline(code,el){
+  document.querySelectorAll('.atab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  (el||event.currentTarget).classList.add('active');
+  document.getElementById('panel-'+code).classList.add('active');
+}
+
+['vs','aa','et','sk'].forEach(initPanel);
 </script>
 </body>
 </html>
