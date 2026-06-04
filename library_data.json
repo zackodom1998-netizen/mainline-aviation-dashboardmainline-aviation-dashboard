@@ -788,7 +788,7 @@
       }
     ],
     "status": "active",
-    "enabled": true,
+    "enabled": false,
     "_rawCount": 1882
   },
   {
@@ -971,8 +971,8 @@
         "week": "2026-07-13"
       }
     ],
-    "status": "active",
-    "enabled": true,
+    "status": "archived",
+    "enabled": false,
     "_rawCount": 1882
   }
 ]
