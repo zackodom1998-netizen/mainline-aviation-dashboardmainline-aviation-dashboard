@@ -271,75 +271,80 @@ function savePAT(){
 }
 
 // ── GitHub JSON read/write ────────────────────────────────────────────────────
-var LS_KEY='fin_lib_local_v2';
+var LS_KEY='fin_lib_v3';
 
-function getLocalLibrary(){
-  try{var d=localStorage.getItem(LS_KEY);return d?JSON.parse(d):null;}catch(e){return null;}
-}
-function setLocalLibrary(lib){
-  try{localStorage.setItem(LS_KEY,JSON.stringify(lib));}catch(e){}
-}
+function getLocal(){try{var d=localStorage.getItem(LS_KEY);return d?JSON.parse(d):null;}catch(e){return null;}}
+function setLocal(lib){try{localStorage.setItem(LS_KEY,JSON.stringify(lib));}catch(e){}}
 
 function loadLibrary(){
-  // 1. Check localStorage first for immediate data (survives CDN propagation delays)
-  var local=getLocalLibrary();
-
-  // 2. Also fetch from GitHub in background to get cross-device updates
-  var pat=getPAT();
-  var headers={'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'};
-  if(pat) headers['Authorization']='token '+pat;
-  var url='https://api.github.com/repos/'+REPO+'/contents/'+JSON_PATH+'?t='+Date.now();
-  var githubPromise=fetch(url,{headers:headers,cache:'no-store'})
-    .then(function(r){if(!r.ok)return null;return r.json();})
-    .then(function(info){
-      if(!info||!info.content)return null;
-      var decoded=decodeURIComponent(escape(atob(info.content.replace(/\n/g,''))));
-      return JSON.parse(decoded);
-    })
-    .catch(function(){return null;});
-
-  // 3. Return local immediately if available; merge with GitHub if it has more entries
+  var local=getLocal();
   if(local&&local.length>0){
-    // Update in background with GitHub data if it has entries we don't have locally
-    githubPromise.then(function(remote){
-      if(!remote)return;
-      var localIds=new Set(local.map(function(e){return e.id;}));
-      var remoteIds=new Set(remote.map(function(e){return e.id;}));
-      var hasNewRemote=remote.some(function(e){return !localIds.has(e.id);});
-      if(hasNewRemote){
-        // Merge: take all local + any remote-only entries
-        var merged=local.slice();
-        remote.forEach(function(e){if(!localIds.has(e.id))merged.push(e);});
-        merged.sort(function(a,b){return a.uploadedAt>b.uploadedAt?1:-1;});
-        setLocalLibrary(merged);
-        _library=merged;
-        renderLibrary();
-      }
-    });
+    // Have local data — use it immediately, then try GitHub for cross-device additions
+    _syncFromGitHub(local);
     return Promise.resolve(local);
   }
-
-  // 4. No local data — wait for GitHub
-  return githubPromise.then(function(remote){
-    if(remote){setLocalLibrary(remote);}
+  // No local data — try GitHub (first-time load or new device)
+  return _fetchFromGitHub().then(function(remote){
+    if(remote&&remote.length>0){setLocal(remote);}
     return remote||[];
   });
 }
 
+function _fetchFromGitHub(){
+  var pat=getPAT();
+  if(!pat) return Promise.resolve(null);
+  var headers={'Accept':'application/vnd.github.v3+json','Authorization':'token '+pat};
+  return fetch(API_URL,{headers:headers,cache:'no-store'})
+    .then(function(r){if(!r.ok)return null;return r.json();})
+    .then(function(info){
+      if(!info||!info.content)return null;
+      return JSON.parse(decodeURIComponent(escape(atob(info.content.replace(/\n/g,'')))));
+    })
+    .catch(function(){return null;});
+}
+
+function _pushToGitHub(lib){
+  var pat=getPAT();
+  if(!pat) return Promise.reject('no_pat');
+  return fetch(API_URL,{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json'},cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(info){
+      var content=btoa(unescape(encodeURIComponent(JSON.stringify(lib,null,2))));
+      return fetch(API_URL,{method:'PUT',headers:{'Authorization':'token '+pat,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update library_data.json',content:content,sha:info.sha})});
+    })
+    .then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.message);});return r.json();});
+}
+
+function _syncFromGitHub(localLib){
+  // Background sync: if GitHub has entries we don't, add them
+  _fetchFromGitHub().then(function(remote){
+    if(!remote||!remote.length)return;
+    var localIds={};
+    localLib.forEach(function(e){localIds[e.id]=true;});
+    var newFromRemote=remote.filter(function(e){return !localIds[e.id];});
+    if(newFromRemote.length>0){
+      var merged=localLib.concat(newFromRemote);
+      setLocal(merged);
+      _library=merged;
+      renderLibrary();
+    }
+  });
+}
+
 function saveLibrary(lib){
-  // Always save to localStorage immediately — this ensures persistence on current device
-  // regardless of GitHub propagation delays
-  setLocalLibrary(lib);
+  // PRIMARY: save to localStorage instantly — always works, no network needed
+  setLocal(lib);
 
   var pat=getPAT();
   if(!pat){
+    // No PAT — localStorage save already done, show PAT modal for GitHub sync
     document.getElementById('pat-overlay').classList.add('show');
-    return Promise.reject('no_pat');
+    return Promise.resolve('saved_local_only');
   }
-  // Then write to GitHub for cross-device sync
+  // SECONDARY: push to GitHub for cross-device sync (background, non-blocking)
   var shaUrl=API_URL+'?t='+Date.now();
   return fetch(shaUrl,{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'},cache:'no-store'})
-    .then(function(r){if(!r.ok)throw new Error('Could not read file SHA: '+r.status);return r.json();})
+    .then(function(r){if(!r.ok)throw new Error('GitHub sync failed: '+r.status);return r.json();})
     .then(function(info){
       var content=btoa(unescape(encodeURIComponent(JSON.stringify(lib,null,2))));
       return fetch(API_URL,{
@@ -434,29 +439,17 @@ function toggleEntry(id,checked){
 }
 function archiveEntry(id,archive){
   if(archive&&!confirm('Archive this entry? It can be restored later.'))return;
-  showProgress();setProgress(30,'Fetching current library…');
-  loadLibrary().then(function(currentLib){
-    currentLib.forEach(function(e){if(e.id===id){e.status=archive?'archived':'active';if(archive)e.enabled=false;}});
-    setProgress(65,'Saving…');
-    return saveLibrary(currentLib).then(function(){
-      _library=currentLib;
-      hideProgress();renderLibrary();
-      showToast(archive?'Entry archived.':'Entry restored.','success');
-    });
-  }).catch(function(err){hideProgress();if(err!=='no_pat')showToast('Save failed: '+err,'error');});
+  _library.forEach(function(e){if(e.id===id){e.status=archive?'archived':'active';if(archive)e.enabled=false;}});
+  setLocal(_library);renderLibrary();
+  showToast(archive?'Entry archived.':'Entry restored.','success');
+  _pushToGitHub(_library).catch(function(){});
 }
 function deleteEntry(id){
   if(!confirm('Permanently delete? This cannot be undone.'))return;
-  showProgress();setProgress(30,'Fetching current library…');
-  loadLibrary().then(function(currentLib){
-    var updated=currentLib.filter(function(e){return e.id!==id;});
-    setProgress(65,'Saving…');
-    return saveLibrary(updated).then(function(){
-      _library=updated;
-      hideProgress();renderLibrary();
-      showToast('Entry deleted.','success');
-    });
-  }).catch(function(err){hideProgress();if(err!=='no_pat')showToast('Delete failed: '+err,'error');});
+  _library=_library.filter(function(e){return e.id!==id;});
+  setLocal(_library);renderLibrary();
+  showToast('Entry deleted.','success');
+  _pushToGitHub(_library).catch(function(){});
 }
 function exportEntry(id){
   var e=_library.find(function(e){return e.id===id;});
@@ -570,29 +563,23 @@ function cancelImport(){document.getElementById('preview-overlay').classList.rem
 function confirmImport(){
   if(!_pending)return;
   document.getElementById('preview-overlay').classList.remove('show');
-  showProgress();setProgress(20,'Fetching current library…');
+  showProgress();setProgress(30,'Saving to library…');
   var p=_pending;
-  // Always read the latest library from GitHub before writing
-  // This prevents race conditions where in-memory state is stale
-  loadLibrary().then(function(currentLib){
-    setProgress(50,'Merging new entry…');
-    // Remove any existing entry with same id (dedup), then add new one
-    var merged=currentLib.filter(function(e){return e.id!==p.id;}).concat([p]);
-    setProgress(70,'Saving to GitHub…');
-    return saveLibrary(merged).then(function(){
-      _library=merged; // Update in-memory from the confirmed saved state
-      setProgress(100,'Done!');
-      setTimeout(function(){
-        hideProgress();
-        _pending=null;
-        renderLibrary();
-        showToast('✓ Saved to library: '+p.rows.length+' records','success');
-      },400);
-    });
-  }).catch(function(err){
-    hideProgress();
-    if(err!=='no_pat')showToast('Save failed: '+err,'error');
-    _pending=p;
+  // Build merged list from current in-memory library
+  var merged=_library.filter(function(e){return e.id!==p.id;}).concat([p]);
+  // Save immediately to localStorage (always works)
+  setLocal(merged);
+  _library=merged;
+  setProgress(80,'Syncing to GitHub…');
+  renderLibrary();
+  // Then try GitHub sync in background
+  _pushToGitHub(merged).then(function(){
+    setProgress(100,'Done!');
+    setTimeout(function(){hideProgress();_pending=null;showToast('✓ '+p.rows.length+' records saved to library','success');},400);
+  }).catch(function(){
+    // GitHub sync failed but localStorage save succeeded — entry is safe
+    setProgress(100,'Saved locally');
+    setTimeout(function(){hideProgress();_pending=null;showToast('✓ Saved to library (GitHub sync pending)','success');},400);
   });
 }
 
