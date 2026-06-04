@@ -237,8 +237,8 @@
         "week": "2026-05-04"
       }
     ],
-    "status": "active",
-    "enabled": true
+    "status": "archived",
+    "enabled": false
   },
   {
     "id": "lib_1780600172733_dktfz",
