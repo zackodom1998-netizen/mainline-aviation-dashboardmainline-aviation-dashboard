@@ -277,24 +277,32 @@ function getLocal(){try{var d=localStorage.getItem(LS_KEY);return d?JSON.parse(d
 function setLocal(lib){try{localStorage.setItem(LS_KEY,JSON.stringify(lib));}catch(e){}}
 
 function loadLibrary(){
-  var local=getLocal();
-  if(local&&local.length>0){
-    // Have local data — use it immediately, then try GitHub for cross-device additions
-    _syncFromGitHub(local);
-    return Promise.resolve(local);
-  }
-  // No local data — try GitHub (first-time load or new device)
+  var local=getLocal()||[];
+  // Always fetch from GitHub to pick up entries added by other devices
   return _fetchFromGitHub().then(function(remote){
-    if(remote&&remote.length>0){setLocal(remote);}
-    return remote||[];
+    if(!remote) return local; // GitHub unreachable — use local only
+    // Merge: take all entries from both, deduplicate by id
+    var seen={};
+    var merged=[];
+    remote.forEach(function(e){if(!seen[e.id]){seen[e.id]=true;merged.push(e);}});
+    local.forEach(function(e){if(!seen[e.id]){seen[e.id]=true;merged.push(e);}});
+    // If merged has more than remote, push to GitHub to sync local-only entries
+    if(merged.length>remote.length){
+      _pushToGitHub(merged).catch(function(){});
+    }
+    if(merged.length>0) setLocal(merged);
+    return merged;
+  }).catch(function(){
+    return local; // Network error — fall back to local
   });
 }
 
 function _fetchFromGitHub(){
+  // Public repo — reads work without a PAT. PAT only needed for writes.
   var pat=getPAT();
-  if(!pat) return Promise.resolve(null);
-  var headers={'Accept':'application/vnd.github.v3+json','Authorization':'token '+pat};
-  return fetch(API_URL,{headers:headers,cache:'no-store'})
+  var headers={'Accept':'application/vnd.github.v3+json'};
+  if(pat) headers['Authorization']='token '+pat;
+  return fetch(API_URL+'?t='+Date.now(),{headers:headers,cache:'no-store'})
     .then(function(r){if(!r.ok)return null;return r.json();})
     .then(function(info){
       if(!info||!info.content)return null;
