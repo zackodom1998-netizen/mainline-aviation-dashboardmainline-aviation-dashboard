@@ -272,10 +272,17 @@ function savePAT(){
 
 // ── GitHub JSON read/write ────────────────────────────────────────────────────
 function loadLibrary(){
-  return fetch(RAW_URL+'?t='+Date.now())
-    .then(function(r){
-      if(!r.ok) return [];
-      return r.json();
+  var pat=getPAT();
+  var headers={'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache','Pragma':'no-cache'};
+  if(pat) headers['Authorization']='token '+pat;
+  // Append timestamp to URL AND use cache:'no-store' to bypass all browser/CDN caching
+  var url='https://api.github.com/repos/'+REPO+'/contents/'+JSON_PATH+'?t='+Date.now();
+  return fetch(url,{headers:headers,cache:'no-store'})
+    .then(function(r){if(!r.ok)return null;return r.json();})
+    .then(function(info){
+      if(!info||!info.content)return [];
+      var decoded=decodeURIComponent(escape(atob(info.content.replace(/\n/g,''))));
+      return JSON.parse(decoded);
     })
     .catch(function(){return [];});
 }
@@ -286,9 +293,10 @@ function saveLibrary(lib){
     document.getElementById('pat-overlay').classList.add('show');
     return Promise.reject('no_pat');
   }
-  // Get current SHA first
-  return fetch(API_URL,{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json'}})
-    .then(function(r){return r.json();})
+  // Fetch current SHA with cache bypass to always get the latest
+  var shaUrl=API_URL+'?t='+Date.now();
+  return fetch(shaUrl,{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'},cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error('Could not read file SHA: '+r.status);return r.json();})
     .then(function(info){
       var content=btoa(unescape(encodeURIComponent(JSON.stringify(lib,null,2))));
       return fetch(API_URL,{
@@ -383,18 +391,28 @@ function toggleEntry(id,checked){
 }
 function archiveEntry(id,archive){
   if(archive&&!confirm('Archive this entry? It can be restored later.'))return;
-  _library.forEach(function(e){if(e.id===id){e.status=archive?'archived':'active';if(archive)e.enabled=false;}});
-  showProgress();setProgress(50,'Saving to library…');
-  saveLibrary(_library).then(function(){
-    hideProgress();renderLibrary();showToast(archive?'Entry archived.':'Entry restored.','success');
+  showProgress();setProgress(30,'Fetching current library…');
+  loadLibrary().then(function(currentLib){
+    currentLib.forEach(function(e){if(e.id===id){e.status=archive?'archived':'active';if(archive)e.enabled=false;}});
+    setProgress(65,'Saving…');
+    return saveLibrary(currentLib).then(function(){
+      _library=currentLib;
+      hideProgress();renderLibrary();
+      showToast(archive?'Entry archived.':'Entry restored.','success');
+    });
   }).catch(function(err){hideProgress();if(err!=='no_pat')showToast('Save failed: '+err,'error');});
 }
 function deleteEntry(id){
   if(!confirm('Permanently delete? This cannot be undone.'))return;
-  _library=_library.filter(function(e){return e.id!==id;});
-  showProgress();setProgress(50,'Saving to library…');
-  saveLibrary(_library).then(function(){
-    hideProgress();renderLibrary();showToast('Entry deleted.','success');
+  showProgress();setProgress(30,'Fetching current library…');
+  loadLibrary().then(function(currentLib){
+    var updated=currentLib.filter(function(e){return e.id!==id;});
+    setProgress(65,'Saving…');
+    return saveLibrary(updated).then(function(){
+      _library=updated;
+      hideProgress();renderLibrary();
+      showToast('Entry deleted.','success');
+    });
   }).catch(function(err){hideProgress();if(err!=='no_pat')showToast('Delete failed: '+err,'error');});
 }
 function exportEntry(id){
@@ -509,23 +527,29 @@ function cancelImport(){document.getElementById('preview-overlay').classList.rem
 function confirmImport(){
   if(!_pending)return;
   document.getElementById('preview-overlay').classList.remove('show');
-  showProgress();setProgress(20,'Validating…');
+  showProgress();setProgress(20,'Fetching current library…');
   var p=_pending;
-  _library.push(p);
-  setProgress(60,'Saving to GitHub…');
-  saveLibrary(_library).then(function(){
-    setProgress(100,'Done!');
-    setTimeout(function(){
-      hideProgress();
-      _pending=null;
-      renderLibrary();
-      showToast('✓ Saved to library: '+p.rows.length+' records','success');
-    },400);
+  // Always read the latest library from GitHub before writing
+  // This prevents race conditions where in-memory state is stale
+  loadLibrary().then(function(currentLib){
+    setProgress(50,'Merging new entry…');
+    // Remove any existing entry with same id (dedup), then add new one
+    var merged=currentLib.filter(function(e){return e.id!==p.id;}).concat([p]);
+    setProgress(70,'Saving to GitHub…');
+    return saveLibrary(merged).then(function(){
+      _library=merged; // Update in-memory from the confirmed saved state
+      setProgress(100,'Done!');
+      setTimeout(function(){
+        hideProgress();
+        _pending=null;
+        renderLibrary();
+        showToast('✓ Saved to library: '+p.rows.length+' records','success');
+      },400);
+    });
   }).catch(function(err){
-    _library=_library.filter(function(e){return e.id!==p.id;}); // rollback
     hideProgress();
     if(err!=='no_pat')showToast('Save failed: '+err,'error');
-    _pending=p; // keep pending so user can retry after entering PAT
+    _pending=p;
   });
 }
 
