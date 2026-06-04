@@ -1288,8 +1288,8 @@
         "week": "2026-07-13"
       }
     ],
-    "status": "active",
-    "enabled": true,
+    "status": "archived",
+    "enabled": false,
     "_rawCount": 1882
   }
 ]
