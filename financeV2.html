@@ -271,29 +271,72 @@ function savePAT(){
 }
 
 // ── GitHub JSON read/write ────────────────────────────────────────────────────
+var LS_KEY='fin_lib_local_v2';
+
+function getLocalLibrary(){
+  try{var d=localStorage.getItem(LS_KEY);return d?JSON.parse(d):null;}catch(e){return null;}
+}
+function setLocalLibrary(lib){
+  try{localStorage.setItem(LS_KEY,JSON.stringify(lib));}catch(e){}
+}
+
 function loadLibrary(){
+  // 1. Check localStorage first for immediate data (survives CDN propagation delays)
+  var local=getLocalLibrary();
+
+  // 2. Also fetch from GitHub in background to get cross-device updates
   var pat=getPAT();
-  var headers={'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache','Pragma':'no-cache'};
+  var headers={'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'};
   if(pat) headers['Authorization']='token '+pat;
-  // Append timestamp to URL AND use cache:'no-store' to bypass all browser/CDN caching
   var url='https://api.github.com/repos/'+REPO+'/contents/'+JSON_PATH+'?t='+Date.now();
-  return fetch(url,{headers:headers,cache:'no-store'})
+  var githubPromise=fetch(url,{headers:headers,cache:'no-store'})
     .then(function(r){if(!r.ok)return null;return r.json();})
     .then(function(info){
-      if(!info||!info.content)return [];
+      if(!info||!info.content)return null;
       var decoded=decodeURIComponent(escape(atob(info.content.replace(/\n/g,''))));
       return JSON.parse(decoded);
     })
-    .catch(function(){return [];});
+    .catch(function(){return null;});
+
+  // 3. Return local immediately if available; merge with GitHub if it has more entries
+  if(local&&local.length>0){
+    // Update in background with GitHub data if it has entries we don't have locally
+    githubPromise.then(function(remote){
+      if(!remote)return;
+      var localIds=new Set(local.map(function(e){return e.id;}));
+      var remoteIds=new Set(remote.map(function(e){return e.id;}));
+      var hasNewRemote=remote.some(function(e){return !localIds.has(e.id);});
+      if(hasNewRemote){
+        // Merge: take all local + any remote-only entries
+        var merged=local.slice();
+        remote.forEach(function(e){if(!localIds.has(e.id))merged.push(e);});
+        merged.sort(function(a,b){return a.uploadedAt>b.uploadedAt?1:-1;});
+        setLocalLibrary(merged);
+        _library=merged;
+        renderLibrary();
+      }
+    });
+    return Promise.resolve(local);
+  }
+
+  // 4. No local data — wait for GitHub
+  return githubPromise.then(function(remote){
+    if(remote){setLocalLibrary(remote);}
+    return remote||[];
+  });
 }
 
 function saveLibrary(lib){
+  // Always save to localStorage immediately — this ensures persistence on current device
+  // regardless of GitHub propagation delays
+  setLocalLibrary(lib);
+
   var pat=getPAT();
   if(!pat){
     document.getElementById('pat-overlay').classList.add('show');
     return Promise.reject('no_pat');
   }
-  // Fetch current SHA with cache bypass to always get the latest
+  // Then write to GitHub for cross-device sync
   var shaUrl=API_URL+'?t='+Date.now();
   return fetch(shaUrl,{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'},cache:'no-store'})
     .then(function(r){if(!r.ok)throw new Error('Could not read file SHA: '+r.status);return r.json();})
