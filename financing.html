@@ -175,7 +175,13 @@ document.getElementById('file-input').addEventListener('change',function(e){
     try{
       var wb=XLSX.read(ev.target.result,{type:'array',cellDates:true,raw:true});
       var ws=wb.Sheets[wb.SheetNames[0]];
-      var rows=XLSX.utils.sheet_to_json(ws,{raw:true,defval:null});
+      // Smart header detection — skips banner/title rows
+      var rawArr=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      if(!rawArr.length){showToast('No rows found in file.','error');return;}
+      var headerRowIdx=0;
+      var HKEYS=['flight','date','subtotal','cost','qty','supplier'];
+      for(var ri=0;ri<Math.min(rawArr.length,10);ri++){var rStr=(rawArr[ri]||[]).map(function(c){return String(c||'').toLowerCase();}).join(' ');if(HKEYS.some(function(k){return rStr.indexOf(k)>=0;})){headerRowIdx=ri;break;}}
+      var rows=XLSX.utils.sheet_to_json(ws,{raw:true,defval:null,range:headerRowIdx});
       if(!rows.length){showToast('No rows found in file.','error');return;}
       var keys=Object.keys(rows[0]);
       var colDate=findCol(keys,['flightdate','date']),colFlight=findCol(keys,['flightno','flightnumber','flight']),colSub=findCol(keys,['subtotal','foodcost','cost']),colRoute=findCol(keys,['route','destination','arr']);
