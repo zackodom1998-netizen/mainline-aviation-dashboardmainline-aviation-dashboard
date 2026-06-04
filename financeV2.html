@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Financing v2 | Mainline Aviation</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;color:#e8eef5;padding:24px;}
+body.in-iframe{padding-top:0;}
+/* ── Tabs ── */
+.top-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:0;}
+.ttab{display:flex;align-items:center;gap:6px;padding:10px 16px;cursor:pointer;font-size:13px;font-weight:600;color:#64748b;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.ttab:hover{color:#94a3b8;}
+.ttab.active{color:#e8eef5;border-bottom-color:#3b82f6;}
+.ttab .dot{width:8px;height:8px;border-radius:50%;}
+.ttab .abadge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;color:#fff;}
+.panel{display:none;}
+.panel.active{display:block;}
+/* ── Library ── */
+.lib-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+.lib-title{font-size:18px;font-weight:700;color:#e8eef5;}
+.lib-filters{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.fchip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:#131826;color:#64748b;transition:all 0.15s;}
+.fchip:hover{border-color:rgba(255,255,255,0.2);color:#94a3b8;}
+.fchip.active{background:#1e3a5f;border-color:#3b82f6;color:#93c5fd;}
+.threshold-wrap{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;}
+.threshold-wrap label{font-weight:600;white-space:nowrap;}
+.threshold-wrap input[type=range]{width:100px;accent-color:#3b82f6;}
+.threshold-val{font-weight:700;color:#3b82f6;min-width:32px;}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:20px;}
+.lib-card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;transition:all 0.15s;position:relative;}
+.lib-card.archived{opacity:0.5;}
+.lib-card.outlier-high{border-color:rgba(251,191,36,0.4);background:#1a1a0f;}
+.lib-card.outlier-vhigh{border-color:rgba(239,68,68,0.4);background:#1a0f0f;}
+.lib-card.outlier-low{border-color:rgba(52,211,153,0.3);background:#0f1a14;}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.card-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;color:#fff;flex-shrink:0;}
+.card-info{flex:1;min-width:0;}
+.card-filename{font-size:13px;font-weight:600;color:#e8eef5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-uploaded{font-size:11px;color:#64748b;margin-top:2px;}
+.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.cstat{background:#0f1623;border-radius:6px;padding:7px 10px;}
+.cstat .cl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:2px;}
+.cstat .cv{font-size:14px;font-weight:700;color:#e8eef5;}
+.cstat .cv.green{color:#34d399;}
+.outlier-badge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.ob-high{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);}
+.ob-vhigh{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);}
+.ob-low{background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.2);}
+.card-actions{display:flex;align-items:center;gap:8px;}
+.toggle-wrap{display:flex;align-items:center;gap:7px;flex:1;}
+.toggle-wrap span{font-size:12px;color:#64748b;}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;inset:0;background:#1e2a3a;border-radius:20px;transition:background 0.2s;}
+.toggle input:checked~.toggle-track{background:#2563eb;}
+.toggle-thumb{position:absolute;height:14px;width:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s;}
+.toggle input:checked~.toggle-thumb{transform:translateX(16px);}
+.btn-sm{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-export{background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);}
+.btn-export:hover{background:rgba(59,130,246,0.22);}
+.btn-archive{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
+.btn-archive:hover{background:rgba(251,191,36,0.2);}
+.btn-restore{background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.2);}
+.btn-restore:hover{background:rgba(52,211,153,0.2);}
+.btn-delete{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.btn-delete:hover{background:rgba(239,68,68,0.2);}
+.lib-footer{display:flex;align-items:center;justify-content:space-between;padding:16px;background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;}
+.lib-footer .sel-info{font-size:13px;color:#64748b;}
+.lib-footer .sel-info span{color:#e8eef5;font-weight:600;}
+.btn-apply{display:inline-flex;align-items:center;gap:7px;background:#16a34a;color:#fff;font-size:13px;font-weight:600;padding:9px 22px;border-radius:7px;border:none;cursor:pointer;transition:background 0.15s;}
+.btn-apply:hover{background:#15803d;}
+.btn-apply:disabled{background:#1e3a2a;color:#4b5563;cursor:not-allowed;}
+/* ── Import bar ── */
+.import-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 18px;}
+.import-bar .ib-label{font-size:13px;color:#94a3b8;flex:1;}
+.import-bar .ib-label span{font-weight:600;color:#e8eef5;}
+.btn-import{display:inline-flex;align-items:center;gap:7px;background:#1d4ed8;color:#fff;font-size:13px;font-weight:600;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;transition:background 0.15s;}
+.btn-import:hover{background:#2563eb;}
+.btn-import svg{width:14px;height:14px;flex-shrink:0;}
+/* ── KPIs ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px;}
+.kpi{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;}
+.kpi .label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px;}
+.kpi .value{font-size:22px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
+.kpi .delta{font-size:12px;color:#64748b;}
+/* ── Sections ── */
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#475569;margin:24px 0 12px;}
+.card{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;margin-bottom:16px;}
+.card h3{font-size:14px;font-weight:600;color:#94a3b8;margin-bottom:16px;}
+.chart-wrap{height:220px;position:relative;}
+/* ── WoW ── */
+.wow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+@media(max-width:700px){.wow-grid{grid-template-columns:1fr;}}
+.wow-stat{background:#131826;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 18px;}
+.wow-stat .wl{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:4px;}
+.wow-stat .wv{font-size:18px;font-weight:700;color:#e8eef5;}
+.wow-stat .ws{font-size:12px;margin-top:3px;}
+.ws.up{color:#34d399;}.ws.down{color:#f87171;}.ws.flat{color:#64748b;}
+/* ── Table ── */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.filters label{font-size:12px;color:#64748b;font-weight:500;}
+.filters select{background:#0f1623;border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eef5;padding:5px 10px;font-size:12px;outline:none;}
+.info{font-size:12px;color:#64748b;margin-left:auto;}
+.tbl-wrap{border-radius:10px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:10px 14px;font-weight:600;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;background:#131826;}
+thead th.r{text-align:right;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.05);}
+tbody tr:hover{background:rgba(255,255,255,0.025);}
+tbody td{padding:10px 14px;vertical-align:middle;}
+tbody td.r{text-align:right;}
+tbody td.dim{color:#64748b;font-size:12px;}
+tfoot td{padding:10px 14px;font-weight:700;background:rgba(255,255,255,0.04);border-top:2px solid rgba(255,255,255,0.1);}
+tfoot td.r{text-align:right;color:#60a5fa;}
+.badge{display:inline-block;font-family:monospace;background:rgba(96,165,250,0.15);color:#60a5fa;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.badge.v110{background:rgba(52,211,153,0.15);color:#34d399;}
+.green{color:#34d399;font-weight:600;}
+.chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px 10px;font-size:12px;color:#cbd5e1;}
+.leads{display:flex;flex-wrap:wrap;gap:5px;}
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:80px 20px;}
+.empty-state .es-icon{font-size:40px;margin-bottom:16px;opacity:0.25;}
+.empty-state .es-title{font-size:17px;font-weight:700;color:#475569;margin-bottom:8px;}
+.empty-state .es-sub{font-size:13px;color:#334155;margin-bottom:24px;line-height:1.6;}
+.btn-go-lib{display:inline-flex;align-items:center;gap:6px;background:#1e3a5f;color:#93c5fd;font-size:13px;font-weight:600;padding:9px 18px;border-radius:7px;border:1px solid rgba(59,130,246,0.3);cursor:pointer;transition:all 0.15s;}
+.btn-go-lib:hover{background:#1e4a7f;}
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 18px;font-size:13px;color:#e8eef5;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:99999;opacity:0;transform:translateY(10px);transition:all 0.25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-color:rgba(52,211,153,0.4);}
+.toast.error{border-color:rgba(248,113,113,0.4);}
+/* ── Preview modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,14,26,0.88);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.preview-box{background:#131826;border:1px solid rgba(255,255,255,0.12);border-radius:14px;width:min(760px,95vw);max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6);}
+.preview-header{padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.preview-title{font-size:16px;font-weight:700;color:#e8eef5;margin-bottom:4px;}
+.preview-meta{font-size:12px;color:#64748b;}
+.preview-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.pstat{background:#0f1623;border-radius:8px;padding:10px 14px;}
+.pstat .pl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:3px;}
+.pstat .pv{font-size:15px;font-weight:700;color:#e8eef5;}
+.pstat .pv.new{color:#34d399;}.pstat .pv.update{color:#fbbf24;}
+.preview-table-wrap{flex:1;overflow-y:auto;padding:0 24px 8px;}
+.preview-table-wrap table{font-size:12px;}
+.preview-table-wrap thead th{font-size:11px;}
+.tag-new{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:12px;background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);}
+.tag-update{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:12px;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
+.preview-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end;align-items:center;}
+.preview-footer .fp-note{font-size:12px;color:#64748b;margin-right:auto;}
+.btn-cancel-modal{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);color:#94a3b8;font-size:13px;font-weight:600;padding:9px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;}
+.btn-confirm-import{display:inline-flex;align-items:center;gap:7px;background:#16a34a;color:#fff;font-size:13px;font-weight:600;padding:9px 20px;border-radius:7px;border:none;cursor:pointer;}
+/* ── Progress ── */
+.progress-overlay{position:fixed;inset:0;background:rgba(10,14,26,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.progress-overlay.show{opacity:1;pointer-events:all;}
+.progress-box{background:#131826;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:32px 40px;min-width:340px;text-align:center;}
+.progress-icon{font-size:28px;margin-bottom:12px;}
+.progress-title{font-size:15px;font-weight:600;color:#e8eef5;margin-bottom:6px;}
+.progress-step{font-size:12px;color:#64748b;margin-bottom:20px;min-height:18px;}
+.progress-track{height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:99px;transition:width 0.4s ease;width:0%;}
+.progress-pct{font-size:12px;color:#22c55e;font-weight:700;}
+/* ── Archived label ── */
+.arch-label{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(100,116,139,0.15);color:#64748b;border:1px solid rgba(100,116,139,0.2);margin-left:6px;}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<input type="file" id="file-input" accept=".xlsx,.xls" style="display:none"/>
+<!-- Preview modal -->
+<div id="preview-overlay" class="modal-overlay">
+  <div class="preview-box">
+    <div class="preview-header"><div class="preview-title" id="preview-title">Review Import</div><div class="preview-meta" id="preview-meta"></div></div>
+    <div class="preview-stats" id="preview-stats"></div>
+    <div class="preview-table-wrap"><table><thead><tr><th>Date</th><th>Flight</th><th>Route</th><th class="r">Cost</th><th>Status</th></tr></thead><tbody id="preview-tbody"></tbody><tfoot><tr><td colspan="3">Total</td><td class="r" id="preview-total"></td><td></td></tr></tfoot></table></div>
+    <div class="preview-footer"><span class="fp-note" id="preview-note"></span><button class="btn-cancel-modal" onclick="cancelImport()">✕ Cancel</button><button class="btn-confirm-import" onclick="confirmImport()">✓ Add to Library</button></div>
+  </div>
+</div>
+<!-- Progress overlay -->
+<div id="progress-overlay" class="progress-overlay">
+  <div class="progress-box"><div class="progress-icon">📥</div><div class="progress-title">Adding to Library…</div><div class="progress-step" id="progress-step">Processing…</div><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><div class="progress-pct" id="progress-pct">0%</div></div>
+</div>
+
+<!-- Main tab bar -->
+<div class="top-tabs" id="main-tabs">
+  <div class="ttab active" data-tab="library" onclick="switchTab('library',this)">📚 Library</div>
+  <div class="ttab" data-tab="vs" onclick="switchTab('vs',this)"><div class="dot" style="background:#C41E3A"></div> Virgin Atlantic <span class="abadge" style="background:#C41E3A">VS</span></div>
+  <div class="ttab" data-tab="aa" onclick="switchTab('aa',this)"><div class="dot" style="background:#0078D7"></div> American Airlines <span class="abadge" style="background:#0078D7">AA</span></div>
+  <div class="ttab" data-tab="et" onclick="switchTab('et',this)"><div class="dot" style="background:#007A4D"></div> Ethiopian Airlines <span class="abadge" style="background:#007A4D">ET</span></div>
+  <div class="ttab" data-tab="sk" onclick="switchTab('sk',this)"><div class="dot" style="background:#003F87"></div> SAS Scandinavian <span class="abadge" style="background:#003F87">SK</span></div>
+</div>
+
+<!-- Library Panel -->
+<div class="panel active" id="panel-library">
+  <div class="lib-header">
+    <div class="lib-title">📚 Finance Data Library</div>
+    <div class="threshold-wrap">
+      <label>Outlier threshold:</label>
+      <input type="range" id="threshold-slider" min="5" max="50" value="20" oninput="updateThreshold(this.value)"/>
+      <span class="threshold-val" id="threshold-val">20%</span>
+    </div>
+    <div class="lib-filters">
+      <div class="fchip active" data-filter="all" onclick="filterLib('all',this)">All</div>
+      <div class="fchip" data-filter="vs" onclick="filterLib('vs',this)" style="border-color:rgba(196,30,58,0.3)">VS</div>
+      <div class="fchip" data-filter="aa" onclick="filterLib('aa',this)" style="border-color:rgba(0,120,215,0.3)">AA</div>
+      <div class="fchip" data-filter="et" onclick="filterLib('et',this)" style="border-color:rgba(0,122,77,0.3)">ET</div>
+      <div class="fchip" data-filter="sk" onclick="filterLib('sk',this)" style="border-color:rgba(0,63,135,0.3)">SK</div>
+    </div>
+  </div>
+  <div class="import-bar">
+    <div class="ib-label">Import a new weekly supplier invoice to add it to the library. <span>Select it and apply to view in charts.</span></div>
+    <select id="import-airline-select" style="background:#0f1623;border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eef5;padding:6px 10px;font-size:12px;outline:none;">
+      <option value="vs">Virgin Atlantic (VS)</option>
+      <option value="aa">American Airlines (AA)</option>
+      <option value="et">Ethiopian Airlines (ET)</option>
+      <option value="sk">SAS Scandinavian (SK)</option>
+    </select>
+    <button class="btn-import" onclick="triggerImport()">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v7.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 11.586V4a1 1 0 011-1z"/><path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+      Import Excel
+    </button>
+  </div>
+  <div class="lib-grid" id="lib-grid"></div>
+  <div class="lib-footer">
+    <span class="sel-info" id="sel-info">Select weeks above then click Apply</span>
+    <button class="btn-apply" id="apply-btn" onclick="applySelection()">✓ Apply Selection</button>
+  </div>
+</div>
+
+<!-- Airline panels -->
+<div class="panel" id="panel-vs"></div>
+<div class="panel" id="panel-aa"></div>
+<div class="panel" id="panel-et"></div>
+<div class="panel" id="panel-sk"></div>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────────
+var AIRLINE_COLORS={vs:'#C41E3A',aa:'#0078D7',et:'#007A4D',sk:'#003F87'};
+var AIRLINE_NAMES={vs:'Virgin Atlantic',aa:'American Airlines',et:'Ethiopian Airlines',sk:'SAS Scandinavian'};
+var SEED_ENTRIES=[{"id":"seed_vs_may01_10","airline":"vs","fileName":"ATL_Supplier_Invoice_May01-10_2026.xlsx","uploadedAt":"2026-05-15T00:00:00.000Z","dateRange":{"start":"2026-05-01","end":"2026-05-10"},"weeks":["2026-04-27","2026-05-04"],"flights":["104","110"],"totalCost":141067.51,"rows":[{"date":"2026-05-01","flight":"104","route":"ATL-LHR","cost":8549.55,"leads":["Bobbie Jackson III","Gabriel Silva Mane"],"week":"2026-04-27"},{"date":"2026-05-01","flight":"110","route":"ATL-MAN","cost":6097.81,"leads":["Maurice Smith","Christian Lawson"],"week":"2026-04-27"},{"date":"2026-05-02","flight":"104","route":"ATL-LHR","cost":7696.54,"leads":["Abubakarr Sessay","Christian Lawson"],"week":"2026-04-27"},{"date":"2026-05-02","flight":"110","route":"ATL-MAN","cost":5747.35,"leads":["Bobbie Jackson III","Maurice Smith"],"week":"2026-04-27"},{"date":"2026-05-03","flight":"104","route":"ATL-LHR","cost":8390.95,"leads":["Bobbie Jackson III","Claudette St. Juste"],"week":"2026-04-27"},{"date":"2026-05-03","flight":"110","route":"ATL-MAN","cost":6279.28,"leads":["Gabriel Silva Mane"],"week":"2026-04-27"},{"date":"2026-05-04","flight":"104","route":"ATL-LHR","cost":8300.94,"leads":["Claudette St. Juste","Abubakarr Sessay"],"week":"2026-05-04"},{"date":"2026-05-04","flight":"110","route":"ATL-MAN","cost":6396.47,"leads":["Bobbie Jackson III","Issa Camara"],"week":"2026-05-04"},{"date":"2026-05-05","flight":"104","route":"ATL-LHR","cost":7652.39,"leads":["Claudette St. Juste","Abubakarr Sessay"],"week":"2026-05-04"},{"date":"2026-05-05","flight":"110","route":"ATL-MAN","cost":6132.13,"leads":["Christian Lawson"],"week":"2026-05-04"},{"date":"2026-05-06","flight":"104","route":"ATL-LHR","cost":7356.35,"leads":["Christian Lawson","Tecari Brown"],"week":"2026-05-04"},{"date":"2026-05-06","flight":"110","route":"ATL-MAN","cost":5658.77,"leads":["Claudette St. Juste","Abdou Diakhate"],"week":"2026-05-04"},{"date":"2026-05-07","flight":"104","route":"ATL-LHR","cost":7721.96,"leads":["Christian Lawson","Abdou Diakhate"],"week":"2026-05-04"},{"date":"2026-05-07","flight":"110","route":"ATL-MAN","cost":5991.99,"leads":["Bobbie Jackson III","Abdou Diakhate"],"week":"2026-05-04"},{"date":"2026-05-08","flight":"104","route":"ATL-LHR","cost":8131.25,"leads":["Gabriel Silva Mane","Maurice Smith"],"week":"2026-05-04"},{"date":"2026-05-08","flight":"110","route":"ATL-MAN","cost":6033.51,"leads":["Christian Lawson","Bobbie Jackson III"],"week":"2026-05-04"},{"date":"2026-05-09","flight":"104","route":"ATL-LHR","cost":8219.44,"leads":["Maurice Smith","Gabriel Silva Mane"],"week":"2026-05-04"},{"date":"2026-05-09","flight":"110","route":"ATL-MAN","cost":6430.59,"leads":["Christian Lawson","Bobbie Jackson III"],"week":"2026-05-04"},{"date":"2026-05-10","flight":"104","route":"ATL-LHR","cost":8233.1,"leads":["Gabriel Silva Mane","Rachel Lester"],"week":"2026-05-04"},{"date":"2026-05-10","flight":"110","route":"ATL-MAN","cost":6047.14,"leads":["Claudette St. Juste","Maurice Smith"],"week":"2026-05-04"}],"status":"active","enabled":false},{"id":"seed_ATL_Supplier_Invoice_TEST_May19-30_2026","airline":"vs","fileName":"ATL_Supplier_Invoice_TEST_May19-30_2026.xlsx","uploadedAt":"2026-06-04T00:00:00.000Z","dateRange":{"start":"2026-05-19","end":"2026-05-30"},"weeks":["2026-05-18","2026-05-25"],"flights":["104","110"],"totalCost":135339.49,"rows":[{"date":"2026-05-19","flight":"104","route":"LHR","cost":8010.49,"leads":[],"week":"2026-05-18"},{"date":"2026-05-19","flight":"110","route":"MAN","cost":5692.85,"leads":[],"week":"2026-05-18"},{"date":"2026-05-20","flight":"104","route":"LHR","cost":7540.8,"leads":[],"week":"2026-05-18"},{"date":"2026-05-20","flight":"110","route":"MAN","cost":5296.66,"leads":[],"week":"2026-05-18"},{"date":"2026-05-21","flight":"104","route":"LHR","cost":8440.53,"leads":[],"week":"2026-05-18"},{"date":"2026-05-21","flight":"110","route":"MAN","cost":6383.9,"leads":[],"week":"2026-05-18"},{"date":"2026-05-22","flight":"104","route":"LHR","cost":7768.82,"leads":[],"week":"2026-05-18"},{"date":"2026-05-22","flight":"110","route":"MAN","cost":5994.65,"leads":[],"week":"2026-05-18"},{"date":"2026-05-23","flight":"104","route":"LHR","cost":7164.43,"leads":[],"week":"2026-05-18"},{"date":"2026-05-23","flight":"110","route":"MAN","cost":5804.42,"leads":[],"week":"2026-05-18"},{"date":"2026-05-26","flight":"104","route":"LHR","cost":6931.44,"leads":[],"week":"2026-05-25"},{"date":"2026-05-26","flight":"110","route":"MAN","cost":5642.75,"leads":[],"week":"2026-05-25"},{"date":"2026-05-27","flight":"104","route":"LHR","cost":7619.12,"leads":[],"week":"2026-05-25"},{"date":"2026-05-27","flight":"110","route":"MAN","cost":5447.31,"leads":[],"week":"2026-05-25"},{"date":"2026-05-28","flight":"104","route":"LHR","cost":8016.69,"leads":[],"week":"2026-05-25"},{"date":"2026-05-28","flight":"110","route":"MAN","cost":5737.67,"leads":[],"week":"2026-05-25"},{"date":"2026-05-29","flight":"104","route":"LHR","cost":7845.17,"leads":[],"week":"2026-05-25"},{"date":"2026-05-29","flight":"110","route":"MAN","cost":6257.98,"leads":[],"week":"2026-05-25"},{"date":"2026-05-30","flight":"104","route":"LHR","cost":7898.31,"leads":[],"week":"2026-05-25"},{"date":"2026-05-30","flight":"110","route":"MAN","cost":5845.5,"leads":[],"week":"2026-05-25"}],"status":"active","enabled":false},{"id":"seed_ATL_Supplier_Invoice_TEST2_Jun02-13_2026","airline":"vs","fileName":"ATL_Supplier_Invoice_TEST2_Jun02-13_2026.xlsx","uploadedAt":"2026-06-04T00:00:00.000Z","dateRange":{"start":"2026-06-02","end":"2026-06-13"},"weeks":["2026-06-01","2026-06-08"],"flights":["104","110"],"totalCost":135737.87,"rows":[{"date":"2026-06-02","flight":"104","route":"LHR","cost":8428.89,"leads":[],"week":"2026-06-01"},{"date":"2026-06-02","flight":"110","route":"MAN","cost":5841.78,"leads":[],"week":"2026-06-01"},{"date":"2026-06-03","flight":"104","route":"LHR","cost":7169.12,"leads":[],"week":"2026-06-01"},{"date":"2026-06-03","flight":"110","route":"MAN","cost":5290.01,"leads":[],"week":"2026-06-01"},{"date":"2026-06-04","flight":"104","route":"LHR","cost":7858.2,"leads":[],"week":"2026-06-01"},{"date":"2026-06-04","flight":"110","route":"MAN","cost":6139.5,"leads":[],"week":"2026-06-01"},{"date":"2026-06-05","flight":"104","route":"LHR","cost":7779.58,"leads":[],"week":"2026-06-01"},{"date":"2026-06-05","flight":"110","route":"MAN","cost":6086.79,"leads":[],"week":"2026-06-01"},{"date":"2026-06-06","flight":"104","route":"LHR","cost":7746.56,"leads":[],"week":"2026-06-01"},{"date":"2026-06-06","flight":"110","route":"MAN","cost":5941.08,"leads":[],"week":"2026-06-01"},{"date":"2026-06-09","flight":"104","route":"LHR","cost":7083.7,"leads":[],"week":"2026-06-08"},{"date":"2026-06-09","flight":"110","route":"MAN","cost":5412.02,"leads":[],"week":"2026-06-08"},{"date":"2026-06-10","flight":"104","route":"LHR","cost":7542.98,"leads":[],"week":"2026-06-08"},{"date":"2026-06-10","flight":"110","route":"MAN","cost":5865.71,"leads":[],"week":"2026-06-08"},{"date":"2026-06-11","flight":"104","route":"LHR","cost":7949.93,"leads":[],"week":"2026-06-08"},{"date":"2026-06-11","flight":"110","route":"MAN","cost":6070.52,"leads":[],"week":"2026-06-08"},{"date":"2026-06-12","flight":"104","route":"LHR","cost":8040.14,"leads":[],"week":"2026-06-08"},{"date":"2026-06-12","flight":"110","route":"MAN","cost":5904.52,"leads":[],"week":"2026-06-08"},{"date":"2026-06-13","flight":"104","route":"LHR","cost":7995.08,"leads":[],"week":"2026-06-08"},{"date":"2026-06-13","flight":"110","route":"MAN","cost":5591.76,"leads":[],"week":"2026-06-08"}],"status":"active","enabled":false},{"id":"seed_ATL_Supplier_Invoice_TEST3_Jun16-27_2026","airline":"vs","fileName":"ATL_Supplier_Invoice_TEST3_Jun16-27_2026.xlsx","uploadedAt":"2026-06-04T00:00:00.000Z","dateRange":{"start":"2026-06-16","end":"2026-06-27"},"weeks":["2026-06-15","2026-06-22"],"flights":["104","110"],"totalCost":133020.45,"rows":[{"date":"2026-06-16","flight":"104","route":"LHR","cost":7981.07,"leads":[],"week":"2026-06-15"},{"date":"2026-06-16","flight":"110","route":"MAN","cost":6082.97,"leads":[],"week":"2026-06-15"},{"date":"2026-06-17","flight":"104","route":"LHR","cost":6861.32,"leads":[],"week":"2026-06-15"},{"date":"2026-06-17","flight":"110","route":"MAN","cost":5139.5,"leads":[],"week":"2026-06-15"},{"date":"2026-06-18","flight":"104","route":"LHR","cost":8072.07,"leads":[],"week":"2026-06-15"},{"date":"2026-06-18","flight":"110","route":"MAN","cost":5939.56,"leads":[],"week":"2026-06-15"},{"date":"2026-06-19","flight":"104","route":"LHR","cost":8185.34,"leads":[],"week":"2026-06-15"},{"date":"2026-06-19","flight":"110","route":"MAN","cost":6224.67,"leads":[],"week":"2026-06-15"},{"date":"2026-06-20","flight":"104","route":"LHR","cost":7420.72,"leads":[],"week":"2026-06-15"},{"date":"2026-06-20","flight":"110","route":"MAN","cost":5654.76,"leads":[],"week":"2026-06-15"},{"date":"2026-06-23","flight":"104","route":"LHR","cost":6841.91,"leads":[],"week":"2026-06-22"},{"date":"2026-06-23","flight":"110","route":"MAN","cost":5303.71,"leads":[],"week":"2026-06-22"},{"date":"2026-06-24","flight":"104","route":"LHR","cost":6830.89,"leads":[],"week":"2026-06-22"},{"date":"2026-06-24","flight":"110","route":"MAN","cost":5623.09,"leads":[],"week":"2026-06-22"},{"date":"2026-06-25","flight":"104","route":"LHR","cost":7769.25,"leads":[],"week":"2026-06-22"},{"date":"2026-06-25","flight":"110","route":"MAN","cost":5758.42,"leads":[],"week":"2026-06-22"},{"date":"2026-06-26","flight":"104","route":"LHR","cost":7768.34,"leads":[],"week":"2026-06-22"},{"date":"2026-06-26","flight":"110","route":"MAN","cost":6054.05,"leads":[],"week":"2026-06-22"},{"date":"2026-06-27","flight":"104","route":"LHR","cost":7747.41,"leads":[],"week":"2026-06-22"},{"date":"2026-06-27","flight":"110","route":"MAN","cost":5761.4,"leads":[],"week":"2026-06-22"}],"status":"active","enabled":false}];
+var charts={}, importTarget=null, _pending=null, libFilter='all', threshold=20;
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+function fmt(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fd(s){return new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fdt(iso){return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function weekLabel(ds){var d=new Date(ds+'T12:00:00'),day=d.getDay(),diff=day===0?-6:1-day,mon=new Date(d);mon.setDate(d.getDate()+diff);return 'Week of '+mon.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function weekKey(ds){var d=new Date(ds+'T12:00:00'),day=d.getDay(),diff=day===0?-6:1-day,mon=new Date(d);mon.setDate(d.getDate()+diff);return mon.toISOString().slice(0,10);}
+function uid(){return 'lib_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);}
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');setTimeout(function(){t.className='toast';},4000);}
+function setProgress(pct,step){document.getElementById('progress-fill').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';if(step)document.getElementById('progress-step').textContent=step;}
+function showProgress(){document.getElementById('progress-overlay').classList.add('show');}
+function hideProgress(){document.getElementById('progress-overlay').classList.remove('show');}
+
+// ── Library storage ────────────────────────────────────────────────────────────
+function getLibrary(){try{return JSON.parse(localStorage.getItem('fin_library_v2')||'null');}catch(e){return null;}}
+function saveLibrary(lib){localStorage.setItem('fin_library_v2',JSON.stringify(lib));}
+function initLibrary(){
+  var lib=getLibrary();
+  if(!lib){lib=SEED_ENTRIES.map(function(e){return Object.assign({},e);});saveLibrary(lib);}
+}
+
+// ── Active rows for airline charts ─────────────────────────────────────────────
+function getActiveRows(airline){
+  var lib=getLibrary()||[];
+  var rows=[];
+  lib.forEach(function(e){
+    if(e.airline===airline&&e.status==='active'&&e.enabled){
+      rows=rows.concat(e.rows);
+    }
+  });
+  rows.sort(function(a,b){return a.date.localeCompare(b.date)||a.flight.localeCompare(b.flight);});
+  return rows;
+}
+
+// ── Outlier calculation ────────────────────────────────────────────────────────
+function calcOutlier(entry){
+  var lib=getLibrary()||[];
+  var same=lib.filter(function(e){return e.airline===entry.airline&&e.status==='active';});
+  if(same.length<2)return null;
+  var mean=same.reduce(function(s,e){return s+e.totalCost;},0)/same.length;
+  var pct=((entry.totalCost-mean)/mean)*100;
+  if(pct>threshold*2)return 'vhigh';
+  if(pct>threshold)return 'high';
+  if(pct<-threshold)return 'low';
+  return null;
+}
+
+// ── Switch tab ─────────────────────────────────────────────────────────────────
+function switchTab(tab,el){
+  document.querySelectorAll('.ttab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  (el||document.querySelector('[data-tab="'+tab+'"]')).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  if(tab!=='library')renderAirlinePanel(tab);
+}
+
+// ── Library render ─────────────────────────────────────────────────────────────
+function updateThreshold(v){threshold=parseInt(v);document.getElementById('threshold-val').textContent=v+'%';renderLibrary();}
+function filterLib(f,el){libFilter=f;document.querySelectorAll('.fchip').forEach(function(c){c.classList.remove('active');});el.classList.add('active');renderLibrary();}
+
+function renderLibrary(){
+  var lib=getLibrary()||[];
+  var filtered=libFilter==='all'?lib:lib.filter(function(e){return e.airline===libFilter;});
+  var active=lib.filter(function(e){return e.status==='active';});
+  var enabled=active.filter(function(e){return e.enabled;});
+  
+  document.getElementById('sel-info').innerHTML='<span>'+enabled.length+'</span> of <span>'+active.length+'</span> entries selected';
+  document.getElementById('apply-btn').disabled=false;
+
+  var html='';
+  if(!filtered.length){
+    html='<div style="grid-column:1/-1;text-align:center;padding:48px;color:#475569;font-size:14px">No entries yet — import an Excel file to get started.</div>';
+  } else {
+    filtered.forEach(function(e){
+      var outlier=calcOutlier(e);
+      var cardCls='lib-card'+(e.status==='archived'?' archived':'')+(outlier?' outlier-'+outlier:'');
+      var color=AIRLINE_COLORS[e.airline]||'#64748b';
+      var flights=e.flights.map(function(f){return 'V'+f;}).join(', ');
+      var weeks=e.weeks.length+' week'+(e.weeks.length!==1?'s':'');
+      
+      var outlierBadge='';
+      if(outlier==='vhigh')outlierBadge='<span class="outlier-badge ob-vhigh">↑ High spend</span>';
+      else if(outlier==='high')outlierBadge='<span class="outlier-badge ob-high">↑ Above avg</span>';
+      else if(outlier==='low')outlierBadge='<span class="outlier-badge ob-low">↓ Below avg</span>';
+      
+      var actionBtns='';
+      if(e.status==='archived'){
+        actionBtns='<button class="btn-sm btn-restore" onclick="restoreEntry(\''+e.id+'\')">↩ Restore</button>'+
+                   '<button class="btn-sm btn-delete" onclick="deleteEntry(\''+e.id+'\')">🗑 Delete</button>';
+      } else {
+        actionBtns='<button class="btn-sm btn-export" onclick="exportEntry(\''+e.id+'\')">⬇ Export</button>'+
+                   '<button class="btn-sm btn-archive" onclick="archiveEntry(\''+e.id+'\')">📦 Archive</button>';
+      }
+      
+      var toggleChecked=e.enabled&&e.status==='active'?'checked':'';
+      var toggleDisabled=e.status==='archived'?'disabled':'';
+      
+      html+='<div class="'+cardCls+'" id="card-'+e.id+'">'+
+        outlierBadge+
+        '<div class="card-top">'+
+          '<span class="card-badge" style="background:'+color+'">'+e.airline.toUpperCase()+'</span>'+
+          '<div class="card-info">'+
+            '<div class="card-filename">'+e.fileName+(e.status==='archived'?'<span class="arch-label">Archived</span>':'')+'</div>'+
+            '<div class="card-uploaded">Uploaded '+fdt(e.uploadedAt)+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="card-stats">'+
+          '<div class="cstat"><div class="cl">Date Range</div><div class="cv">'+fd(e.dateRange.start)+' – '+fd(e.dateRange.end)+'</div></div>'+
+          '<div class="cstat"><div class="cl">Flights</div><div class="cv">'+flights+'</div></div>'+
+          '<div class="cstat"><div class="cl">Weeks</div><div class="cv">'+weeks+'</div></div>'+
+          '<div class="cstat"><div class="cl">Total Cost</div><div class="cv green">'+fmt(e.totalCost)+'</div></div>'+
+        '</div>'+
+        '<div class="card-actions">'+
+          '<label class="toggle-wrap">'+
+            '<label class="toggle">'+
+              '<input type="checkbox" '+toggleChecked+' '+toggleDisabled+' onchange="toggleEntry(\''+e.id+'\',this.checked)"/>'+
+              '<div class="toggle-track"></div><div class="toggle-thumb"></div>'+
+            '</label>'+
+            '<span>'+(e.enabled&&e.status==='active'?'Selected':'Not selected')+'</span>'+
+          '</label>'+
+          actionBtns+
+        '</div>'+
+      '</div>';
+    });
+  }
+  document.getElementById('lib-grid').innerHTML=html;
+}
+
+// ── Library actions ────────────────────────────────────────────────────────────
+function toggleEntry(id,checked){
+  var lib=getLibrary()||[];
+  lib.forEach(function(e){if(e.id===id)e.enabled=checked;});
+  saveLibrary(lib);renderLibrary();
+}
+function archiveEntry(id){
+  if(!confirm('Archive this entry? It will be removed from charts but can be restored.'))return;
+  var lib=getLibrary()||[];
+  lib.forEach(function(e){if(e.id===id){e.status='archived';e.enabled=false;}});
+  saveLibrary(lib);renderLibrary();showToast('Entry archived.','');
+}
+function restoreEntry(id){
+  var lib=getLibrary()||[];
+  lib.forEach(function(e){if(e.id===id)e.status='active';});
+  saveLibrary(lib);renderLibrary();showToast('Entry restored.','success');
+}
+function deleteEntry(id){
+  if(!confirm('Permanently delete this entry? This cannot be undone.'))return;
+  var lib=(getLibrary()||[]).filter(function(e){return e.id!==id;});
+  saveLibrary(lib);renderLibrary();showToast('Entry permanently deleted.','');
+}
+function exportEntry(id){
+  var lib=getLibrary()||[];
+  var entry=lib.find(function(e){return e.id===id;});
+  if(!entry){showToast('Entry not found.','error');return;}
+  if(typeof XLSX==='undefined'){showToast('Excel library not loaded.','error');return;}
+  var data=[['Date','Flight','Route','Food Cost (USD)','Week']];
+  entry.rows.forEach(function(r){data.push([r.date,'V'+r.flight,r.route||'',r.cost,weekLabel(r.week)]);});
+  var ws=XLSX.utils.aoa_to_sheet(data);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Cost Data');
+  XLSX.writeFile(wb,entry.fileName.replace('.xlsx','')+'_export.xlsx');
+  showToast('Exported '+entry.rows.length+' rows.','success');
+}
+function applySelection(){
+  renderLibrary();
+  ['vs','aa','et','sk'].forEach(function(a){
+    var panelEl=document.getElementById('panel-'+a);
+    if(panelEl.classList.contains('active'))renderAirlinePanel(a);
+  });
+  showToast('Selection applied to all charts.','success');
+}
+
+// ── Date parser ────────────────────────────────────────────────────────────────
+function parseDate(raw){
+  if(!raw)return null;
+  if(raw instanceof Date&&!isNaN(raw))return raw.toISOString().slice(0,10);
+  if(typeof raw==='number'){var e=new Date(Math.round((raw-25569)*86400*1000));if(!isNaN(e))return e.toISOString().slice(0,10);}
+  var s=String(raw).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
+  var d=new Date(s);if(!isNaN(d))return d.toISOString().slice(0,10);
+  var p=s.split(/[\/\-\.]/);
+  if(p.length===3){var y=p[2].length===4?p[2]:'20'+p[2],m=p[1].padStart(2,'0'),dy=p[0].padStart(2,'0'),t=new Date(y+'-'+m+'-'+dy);if(!isNaN(t))return y+'-'+m+'-'+dy;}
+  return null;
+}
+function findCol(keys,pats){for(var i=0;i<pats.length;i++){var p=pats[i].toLowerCase().replace(/[\s_.]/g,'');for(var j=0;j<keys.length;j++){if(keys[j].toLowerCase().replace(/[\s_.]/g,'').indexOf(p)>=0)return keys[j];}}return null;}
+
+// ── Import flow ────────────────────────────────────────────────────────────────
+function triggerImport(){
+  if(typeof XLSX==='undefined'){showToast('Excel library not loaded yet.','error');return;}
+  importTarget=document.getElementById('import-airline-select').value;
+  var fi=document.getElementById('file-input');fi.value='';fi.click();
+}
+
+document.getElementById('file-input').addEventListener('change',function(e){
+  var file=e.target.files[0];if(!file)return;
+  var airline=importTarget;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var wb=XLSX.read(ev.target.result,{type:'array',cellDates:true,raw:true});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rawArr=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      var headerIdx=0;
+      var HKEYS=['flight','date','subtotal','cost','qty','supplier'];
+      for(var ri=0;ri<Math.min(rawArr.length,10);ri++){
+        var rStr=(rawArr[ri]||[]).map(function(c){return String(c||'').toLowerCase();}).join(' ');
+        if(HKEYS.some(function(k){return rStr.indexOf(k)>=0;})){headerIdx=ri;break;}
+      }
+      var rows=XLSX.utils.sheet_to_json(ws,{raw:true,defval:null,range:headerIdx});
+      if(!rows.length){showToast('No rows found.','error');return;}
+      var keys=Object.keys(rows[0]);
+      var colDate=findCol(keys,['flightdate','date']);
+      var colFlight=findCol(keys,['flightno','flightnumber','flight']);
+      var colSub=findCol(keys,['subtotal','foodcost','cost']);
+      var colRoute=findCol(keys,['route','destination','arr']);
+      if(!colDate||!colFlight||!colSub){showToast('Missing columns: FLIGHT DATE, FLIGHT NO., SUBTOTAL','error');return;}
+      var grouped={};
+      rows.forEach(function(r){
+        var ds=parseDate(r[colDate]);if(!ds)return;
+        var fl=String(r[colFlight]||'').trim().replace(/^V/i,'').replace(/\s+/g,'');if(!fl)return;
+        var rawC=r[colSub],cost=typeof rawC==='number'?rawC:parseFloat(String(rawC||'').replace(/[^0-9.\-]/g,''));
+        if(!cost||isNaN(cost)||cost<=0)return;
+        var route=colRoute?String(r[colRoute]||'').trim():'';
+        var key=ds+'|'+fl;
+        if(!grouped[key])grouped[key]={date:ds,flight:fl,route:route,cost:0,leads:[],week:weekKey(ds)};
+        grouped[key].cost=Math.round((grouped[key].cost+cost)*100)/100;
+        if(route&&!grouped[key].route)grouped[key].route=route;
+      });
+      var newRows=Object.values(grouped).filter(function(r){return r.cost>0;});
+      newRows.sort(function(a,b){return a.date.localeCompare(b.date)||a.flight.localeCompare(b.flight);});
+      if(!newRows.length){showToast('No valid records found.','error');return;}
+      var lib=getLibrary()||[];
+      var existKeys={};
+      lib.filter(function(e){return e.airline===airline&&e.status==='active';}).forEach(function(e){e.rows.forEach(function(r){existKeys[r.date+'|'+r.flight]=true;});});
+      var added=newRows.filter(function(r){return!existKeys[r.date+'|'+r.flight];});
+      var updated=newRows.filter(function(r){return existKeys[r.date+'|'+r.flight];});
+      var dates=newRows.map(function(r){return r.date;}).sort();
+      var weeks=Array.from(new Set(newRows.map(function(r){return r.week;}))).sort();
+      var flights=Array.from(new Set(newRows.map(function(r){return r.flight;}))).sort();
+      var total=Math.round(newRows.reduce(function(s,r){return s+r.cost;},0)*100)/100;
+      _pending={
+        id:uid(), airline:airline, fileName:file.name,
+        uploadedAt:new Date().toISOString(),
+        dateRange:{start:dates[0],end:dates[dates.length-1]},
+        weeks:weeks, flights:flights, totalCost:total, rows:newRows,
+        status:'active', enabled:true,
+        _added:added.length, _updated:updated.length, _rawCount:rows.length
+      };
+      showPreviewModal(_pending);
+    }catch(err){console.error(err);showToast('Error: '+err.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function showPreviewModal(p){
+  document.getElementById('preview-title').textContent='Review Import — '+AIRLINE_NAMES[p.airline];
+  document.getElementById('preview-meta').textContent=p.fileName+' · '+p._rawCount.toLocaleString()+' raw rows → '+p.rows.length+' flight records';
+  document.getElementById('preview-stats').innerHTML=
+    '<div class="pstat"><div class="pl">Records</div><div class="pv">'+p.rows.length+'</div></div>'+
+    '<div class="pstat"><div class="pl">Flights</div><div class="pv">'+p.flights.map(function(f){return 'V'+f;}).join(', ')+'</div></div>'+
+    '<div class="pstat"><div class="pl">Weeks</div><div class="pv">'+p.weeks.length+'</div></div>'+
+    '<div class="pstat"><div class="pl">New</div><div class="pv new">'+p._added+'</div></div>'+
+    '<div class="pstat"><div class="pl">Updates</div><div class="pv update">'+p._updated+'</div></div>'+
+    '<div class="pstat"><div class="pl">Total Cost</div><div class="pv">'+fmt(p.totalCost)+'</div></div>';
+  document.getElementById('preview-tbody').innerHTML=p.rows.map(function(r){
+    return '<tr><td>'+fd(r.date)+'</td><td><span class="badge'+(r.flight==='104'?'':' v110')+'">V'+r.flight+'</span></td><td class="dim">'+(r.route||'—')+'</td><td class="r green">'+fmt(r.cost)+'</td><td><span class="tag-new">New entry</span></td></tr>';
+  }).join('');
+  document.getElementById('preview-total').textContent=fmt(p.totalCost);
+  document.getElementById('preview-note').textContent='Weeks: '+p.weeks.map(function(w){return weekLabel(w);}).join(', ');
+  document.getElementById('preview-overlay').classList.add('show');
+}
+function cancelImport(){document.getElementById('preview-overlay').classList.remove('show');_pending=null;showToast('Import cancelled.','');}
+function confirmImport(){
+  if(!_pending)return;
+  document.getElementById('preview-overlay').classList.remove('show');
+  showProgress();setProgress(10,'Validating…');
+  var p=_pending;
+  setTimeout(function(){setProgress(50,'Adding to library…');
+    setTimeout(function(){setProgress(85,'Saving…');
+      var lib=getLibrary()||[];
+      lib.push(p);saveLibrary(lib);
+      sessionStorage.setItem('lib_msg','✓ Added to library: '+p.fileName);
+      setProgress(100,'Done!');
+      setTimeout(function(){hideProgress();renderLibrary();showToast('✓ Added to library: '+p.rows.length+' records','success');_pending=null;},400);
+    },400);
+  },400);
+}
+
+// ── Airline panel rendering ────────────────────────────────────────────────────
+function renderWoW(cid,data,color){
+  var el=document.getElementById(cid);if(!el)return;
+  var bw={};data.forEach(function(r){if(!bw[r.week])bw[r.week]={total:0,count:0,label:weekLabel(r.week)};bw[r.week].total+=r.cost;bw[r.week].count++;});
+  var wks=Object.keys(bw).sort();if(wks.length<2){el.innerHTML='';return;}
+  var prev=bw[wks[wks.length-2]],curr=bw[wks[wks.length-1]];
+  var diff=curr.total-prev.total,pct=prev.total?((diff/prev.total)*100):0;
+  var arrow=diff>=0?'↑':'↓',cls=diff>0?'down':(diff<0?'up':'flat'),ps=(diff>=0?'+':'')+pct.toFixed(1)+'%';
+  var fns=Array.from(new Set(data.map(function(r){return r.flight;}))).sort();
+  var ds=fns.map(function(f,i){return{label:'V'+f,data:wks.map(function(w){return data.filter(function(r){return r.week===w&&r.flight===f;}).reduce(function(s,r){return s+r.cost;},0);}),backgroundColor:i===0?color+'cc':color+'66',borderRadius:4};});
+  el.innerHTML='<div class="section-title">Week-over-Week Comparison</div>'+
+    '<div class="wow-grid">'+
+      '<div class="wow-stat"><div class="wl">'+curr.label+'</div><div class="wv">'+fmt(curr.total)+'</div><div class="ws '+cls+'">'+arrow+' '+ps+' vs '+prev.label+'</div></div>'+
+      '<div class="wow-stat"><div class="wl">'+prev.label+' (prior)</div><div class="wv" style="color:#64748b">'+fmt(prev.total)+'</div><div class="ws flat">'+prev.count+' flights</div></div>'+
+    '</div>'+
+    '<div class="card"><h3>Weekly Total by Flight</h3><div class="chart-wrap"><canvas id="'+cid+'-wc"></canvas></div></div>';
+  setTimeout(function(){var ctx=document.getElementById(cid+'-wc');if(!ctx)return;new Chart(ctx,{type:'bar',data:{labels:wks.map(function(w){return weekLabel(w).replace('Week of ','');}),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8'}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}},scales:{x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#64748b',callback:function(v){return '$'+v.toLocaleString();}},grid:{color:'rgba(255,255,255,0.05)'}}}}});},50);
+}
+
+function renderAirlinePanel(airline){
+  var el=document.getElementById('panel-'+airline);
+  var color=AIRLINE_COLORS[airline], name=AIRLINE_NAMES[airline];
+  var data=getActiveRows(airline);
+  
+  if(!data.length){
+    el.innerHTML='<div class="empty-state">'+
+      '<div class="es-icon">📊</div>'+
+      '<div class="es-title">No data selected for '+name+'</div>'+
+      '<div class="es-sub">Go to the Library tab, toggle the weeks you want to view,<br>then click <strong>Apply Selection</strong> to display charts here.</div>'+
+      '<button class="btn-go-lib" onclick="switchTab(\'library\',null)">📚 Open Library</button>'+
+    '</div>';
+    return;
+  }
+  
+  var wks=Array.from(new Set(data.map(function(r){return r.week;}))).sort();
+  var fl=Array.from(new Set(data.map(function(r){return r.flight;}))).sort();
+  var gt=data.reduce(function(s,r){return s+r.cost;},0);
+  
+  var kh='<div class="kpis">';
+  kh+='<div class="kpi"><div class="label">Total Food Cost</div><div class="value">'+fmt(gt)+'</div><div class="delta">'+wks.length+' week'+(wks.length!==1?'s':'')+' · '+data.length+' flights</div></div>';
+  fl.forEach(function(f){var ft=data.filter(function(r){return r.flight===f;}).reduce(function(s,r){return s+r.cost;},0),fc=data.filter(function(r){return r.flight===f;}).length;kh+='<div class="kpi"><div class="label">V'+f+'</div><div class="value">'+fmt(ft)+'</div><div class="delta">'+fc+' departures</div></div>';});
+  kh+='<div class="kpi"><div class="label">Avg / Flight</div><div class="value">'+fmt(gt/data.length)+'</div><div class="delta">selected weeks</div></div>';
+  kh+='</div>';
+  
+  el.innerHTML='<div class="import-bar"><div class="ib-label">Add more data for <strong>'+name+'</strong> via the Library tab.</div><button class="btn-go-lib" onclick="switchTab(\'library\',null)" style="flex-shrink:0">📚 Open Library</button></div>'+
+    kh+'<div id="wow-'+airline+'"></div>'+
+    '<div class="section-title">Daily Food Cost</div>'+
+    '<div class="card"><h3>Food Cost by Flight (USD)</h3><div class="chart-wrap"><canvas id="chart-'+airline+'"></canvas></div></div>'+
+    '<div class="section-title">Cost Breakdown</div>'+
+    '<div class="filters">'+
+      '<label>Week:</label><select id="fW-'+airline+'" onchange="renderAirlinePanel(\''+airline+'\')"><option value="">All weeks</option>'+wks.map(function(w){return '<option value="'+w+'">'+weekLabel(w)+'</option>';}).join('')+'</select>'+
+      '<label>Flight:</label><select id="fF-'+airline+'" onchange="renderAirlinePanel(\''+airline+'\')"><option value="">All</option>'+fl.map(function(f){return '<option value="'+f+'">V'+f+'</option>';}).join('')+'</select>'+
+      '<span class="info" id="info-'+airline+'"></span>'+
+    '</div>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Flight</th><th>Airline</th><th>Route</th><th>Team Lead(s)</th><th class="r">Food Cost</th></tr></thead><tbody id="tbody-'+airline+'"></tbody><tfoot><tr><td colspan="5">Total</td><td class="r" id="ft-'+airline+'"></td></tr></tfoot></table></div>';
+  
+  renderWoW('wow-'+airline,data,color);
+  
+  var sw=document.getElementById('fW-'+airline)?.value||'',sf=document.getElementById('fF-'+airline)?.value||'';
+  var filt=data.filter(function(r){return(!sw||r.week===sw)&&(!sf||r.flight===sf);});
+  var dates=Array.from(new Set(filt.map(function(r){return r.date;}))).sort();
+  var flf=sf?[sf]:fl;
+  
+  setTimeout(function(){
+    var ctx=document.getElementById('chart-'+airline);
+    if(!ctx)return;
+    if(charts[airline])charts[airline].destroy();
+    charts[airline]=new Chart(ctx,{type:'bar',data:{labels:dates.map(function(d){return fd(d).replace(/, \d{4}/,'');}),datasets:flf.map(function(f,i){return{label:'V'+f,data:dates.map(function(d){var row=filt.find(function(r){return r.date===d&&r.flight===f;});return row?row.cost:0;}),backgroundColor:i===0?color+'cc':color+'55',borderRadius:4};})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8'}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}},scales:{x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#64748b',callback:function(v){return '$'+v.toLocaleString();}},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  },50);
+  
+  var h2='',tc=0;
+  filt.forEach(function(r){tc+=r.cost;var bc=fl.indexOf(r.flight)>0?'v110':'';var lh=r.leads&&r.leads.length?r.leads.map(function(l){return "<span class='chip'>"+l+"</span>";}).join(''):"<span class='chip' style='color:#475569'>—</span>";h2+="<tr><td>"+fd(r.date)+"</td><td><span class='badge "+bc+"'>V"+r.flight+"</span></td><td><span style='background:rgba(99,102,241,0.1);color:#a5b4fc;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;'>"+name+"</span></td><td class='dim'>"+(r.route||'—')+"</td><td><div class='leads'>"+lh+"</div></td><td class='r green'>"+fmt(r.cost)+"</td></tr>";});
+  document.getElementById('tbody-'+airline).innerHTML=h2||"<tr><td colspan='6' style='text-align:center;color:#475569;padding:30px'>No rows match filters</td></tr>";
+  document.getElementById('info-'+airline).textContent=filt.length+' rows';
+  document.getElementById('ft-'+airline).textContent=fmt(tc);
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+initLibrary();
+renderLibrary();
+if(window.self!==window.top){document.body.classList.add('in-iframe');}
+</script>
+</body>
+</html>
