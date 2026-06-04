@@ -405,11 +405,11 @@ function switchTab(tab,el){
 }
 
 function renderLibrary(){
-  var active=_library.filter(function(e){return e.status==='active';});
+  var active=_library.filter(function(e){return e.status==='active'||e.status==='archived';}).filter(function(e){return e.status==='active';});
   var enabled=active.filter(function(e){return e.enabled;});
   document.getElementById('sel-info').innerHTML='<span>'+enabled.length+'</span> of <span>'+active.length+'</span> entries selected';
 
-  var filtered=libFilter==='all'?_library:_library.filter(function(e){return e.airline===libFilter;});
+  var filtered=_library.filter(function(e){return e.status!=='deleted'&&(libFilter==='all'||e.airline===libFilter);});
   if(!filtered.length){
     document.getElementById('lib-grid').innerHTML='<div class="loading-state">No entries yet — import an Excel file to get started.</div>';
     return;
@@ -468,7 +468,9 @@ function archiveEntry(id,archive){
 }
 function deleteEntry(id){
   if(!confirm('Permanently delete? This cannot be undone.'))return;
-  _library=_library.filter(function(e){return e.id!==id;});
+  // Soft-delete: mark as deleted so the merge in _pushToGitHub correctly propagates
+  // across devices (hard removal gets re-added by the merge logic)
+  _library.forEach(function(e){if(e.id===id){e.status='deleted';e.enabled=false;}});
   setLocal(_library);renderLibrary();
   showToast('Entry deleted.','success');
   _pushToGitHub(_library).catch(function(){});
