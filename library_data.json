@@ -1291,5 +1291,189 @@
     "status": "deleted",
     "enabled": false,
     "_rawCount": 1882
+  },
+  {
+    "id": "lib_1780602899642_d6wni",
+    "airline": "vs",
+    "fileName": "ATL_Supplier_Invoice_TEST2_Jun02-13_2026.xlsx",
+    "uploadedAt": "2026-06-04T19:54:59.642Z",
+    "dateRange": {
+      "start": "2026-06-02",
+      "end": "2026-06-13"
+    },
+    "weeks": [
+      "2026-06-01",
+      "2026-06-08"
+    ],
+    "flights": [
+      "104",
+      "110"
+    ],
+    "totalCost": 135737.87,
+    "rows": [
+      {
+        "date": "2026-06-02",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8428.89,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-02",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5841.78,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-03",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7169.12,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-03",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5290.01,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-04",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7858.2,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-04",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6139.5,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-05",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7779.58,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-05",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6086.79,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-06",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7746.56,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-06",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5941.08,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-09",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7083.7,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-09",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5412.02,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-10",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7542.98,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-10",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5865.71,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-11",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7949.93,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-11",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6070.52,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-12",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8040.14,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-12",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5904.52,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-13",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7995.08,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-13",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5591.76,
+        "leads": [],
+        "week": "2026-06-08"
+      }
+    ],
+    "status": "active",
+    "enabled": true,
+    "_rawCount": 1882
   }
 ]
