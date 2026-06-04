@@ -552,8 +552,8 @@
         "week": "2026-06-08"
       }
     ],
-    "status": "active",
-    "enabled": true,
+    "status": "archived",
+    "enabled": false,
     "_rawCount": 1882
   }
 ]
