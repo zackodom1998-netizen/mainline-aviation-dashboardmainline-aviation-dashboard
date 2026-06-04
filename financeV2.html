@@ -314,10 +314,24 @@ function _fetchFromGitHub(){
 function _pushToGitHub(lib){
   var pat=getPAT();
   if(!pat) return Promise.reject('no_pat');
+  // Read current GitHub state first, then merge — never blindly overwrite
   return fetch(API_URL,{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json'},cache:'no-store'})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(info){
-      var content=btoa(unescape(encodeURIComponent(JSON.stringify(lib,null,2))));
+      // Parse current GitHub content
+      var remote=[];
+      if(info&&info.content){
+        try{remote=JSON.parse(decodeURIComponent(escape(atob(info.content.replace(/\n/g,'')))));}catch(e){}
+      }
+      // Merge: start with GitHub data, then apply local updates
+      var libMap={};
+      lib.forEach(function(e){libMap[e.id]=e;});
+      var remoteIds={};
+      remote.forEach(function(e){remoteIds[e.id]=true;});
+      // Update existing GitHub entries with local changes, add local-only entries
+      var merged=remote.map(function(e){return libMap[e.id]||e;});
+      lib.forEach(function(e){if(!remoteIds[e.id])merged.push(e);});
+      var content=btoa(unescape(encodeURIComponent(JSON.stringify(merged,null,2))));
       return fetch(API_URL,{method:'PUT',headers:{'Authorization':'token '+pat,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update library_data.json',content:content,sha:info.sha})});
     })
     .then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.message);});return r.json();});
