@@ -420,8 +420,8 @@
         "week": "2026-05-25"
       }
     ],
-    "status": "active",
-    "enabled": true
+    "status": "archived",
+    "enabled": false
   },
   {
     "id": "lib_1780599464294_vnx2o",
