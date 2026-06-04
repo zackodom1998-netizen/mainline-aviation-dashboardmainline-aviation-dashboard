@@ -921,7 +921,7 @@
       }
     ],
     "status": "active",
-    "enabled": false,
+    "enabled": true,
     "_rawCount": 1882
   },
   {
@@ -1104,8 +1104,8 @@
         "week": "2026-05-25"
       }
     ],
-    "status": "active",
-    "enabled": true,
+    "status": "archived",
+    "enabled": false,
     "_rawCount": 1882
   }
 ]
