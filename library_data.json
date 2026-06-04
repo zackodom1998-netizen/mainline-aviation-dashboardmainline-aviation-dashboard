@@ -4,31 +4,238 @@
     "airline": "vs",
     "fileName": "ATL_Supplier_Invoice_May01-10_2026.xlsx",
     "uploadedAt": "2026-05-15T00:00:00.000Z",
-    "dateRange": {"start": "2026-05-01","end": "2026-05-10"},
-    "weeks": ["2026-04-27","2026-05-04"],
-    "flights": ["104","110"],
+    "dateRange": {
+      "start": "2026-05-01",
+      "end": "2026-05-10"
+    },
+    "weeks": [
+      "2026-04-27",
+      "2026-05-04"
+    ],
+    "flights": [
+      "104",
+      "110"
+    ],
     "totalCost": 141067.51,
     "rows": [
-      {"date":"2026-05-01","flight":"104","route":"ATL-LHR","cost":8549.55,"leads":["Bobbie Jackson III","Gabriel Silva Mane"],"week":"2026-04-27"},
-      {"date":"2026-05-01","flight":"110","route":"ATL-MAN","cost":6097.81,"leads":["Maurice Smith","Christian Lawson"],"week":"2026-04-27"},
-      {"date":"2026-05-02","flight":"104","route":"ATL-LHR","cost":7696.54,"leads":["Abubakarr Sessay","Christian Lawson"],"week":"2026-04-27"},
-      {"date":"2026-05-02","flight":"110","route":"ATL-MAN","cost":5747.35,"leads":["Bobbie Jackson III","Maurice Smith"],"week":"2026-04-27"},
-      {"date":"2026-05-03","flight":"104","route":"ATL-LHR","cost":8390.95,"leads":["Bobbie Jackson III","Claudette St. Juste"],"week":"2026-04-27"},
-      {"date":"2026-05-03","flight":"110","route":"ATL-MAN","cost":6279.28,"leads":["Gabriel Silva Mane"],"week":"2026-04-27"},
-      {"date":"2026-05-04","flight":"104","route":"ATL-LHR","cost":8300.94,"leads":["Claudette St. Juste","Abubakarr Sessay"],"week":"2026-05-04"},
-      {"date":"2026-05-04","flight":"110","route":"ATL-MAN","cost":6396.47,"leads":["Bobbie Jackson III","Issa Camara"],"week":"2026-05-04"},
-      {"date":"2026-05-05","flight":"104","route":"ATL-LHR","cost":7652.39,"leads":["Claudette St. Juste","Abubakarr Sessay"],"week":"2026-05-04"},
-      {"date":"2026-05-05","flight":"110","route":"ATL-MAN","cost":6132.13,"leads":["Christian Lawson"],"week":"2026-05-04"},
-      {"date":"2026-05-06","flight":"104","route":"ATL-LHR","cost":7356.35,"leads":["Christian Lawson","Tecari Brown"],"week":"2026-05-04"},
-      {"date":"2026-05-06","flight":"110","route":"ATL-MAN","cost":5658.77,"leads":["Claudette St. Juste","Abdou Diakhate"],"week":"2026-05-04"},
-      {"date":"2026-05-07","flight":"104","route":"ATL-LHR","cost":7721.96,"leads":["Christian Lawson","Abdou Diakhate"],"week":"2026-05-04"},
-      {"date":"2026-05-07","flight":"110","route":"ATL-MAN","cost":5991.99,"leads":["Bobbie Jackson III","Abdou Diakhate"],"week":"2026-05-04"},
-      {"date":"2026-05-08","flight":"104","route":"ATL-LHR","cost":8131.25,"leads":["Gabriel Silva Mane","Maurice Smith"],"week":"2026-05-04"},
-      {"date":"2026-05-08","flight":"110","route":"ATL-MAN","cost":6033.51,"leads":["Christian Lawson","Bobbie Jackson III"],"week":"2026-05-04"},
-      {"date":"2026-05-09","flight":"104","route":"ATL-LHR","cost":8219.44,"leads":["Maurice Smith","Gabriel Silva Mane"],"week":"2026-05-04"},
-      {"date":"2026-05-09","flight":"110","route":"ATL-MAN","cost":6430.59,"leads":["Christian Lawson","Bobbie Jackson III"],"week":"2026-05-04"},
-      {"date":"2026-05-10","flight":"104","route":"ATL-LHR","cost":8233.1,"leads":["Gabriel Silva Mane","Rachel Lester"],"week":"2026-05-04"},
-      {"date":"2026-05-10","flight":"110","route":"ATL-MAN","cost":6047.14,"leads":["Claudette St. Juste","Maurice Smith"],"week":"2026-05-04"}
+      {
+        "date": "2026-05-01",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 8549.55,
+        "leads": [
+          "Bobbie Jackson III",
+          "Gabriel Silva Mane"
+        ],
+        "week": "2026-04-27"
+      },
+      {
+        "date": "2026-05-01",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6097.81,
+        "leads": [
+          "Maurice Smith",
+          "Christian Lawson"
+        ],
+        "week": "2026-04-27"
+      },
+      {
+        "date": "2026-05-02",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 7696.54,
+        "leads": [
+          "Abubakarr Sessay",
+          "Christian Lawson"
+        ],
+        "week": "2026-04-27"
+      },
+      {
+        "date": "2026-05-02",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 5747.35,
+        "leads": [
+          "Bobbie Jackson III",
+          "Maurice Smith"
+        ],
+        "week": "2026-04-27"
+      },
+      {
+        "date": "2026-05-03",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 8390.95,
+        "leads": [
+          "Bobbie Jackson III",
+          "Claudette St. Juste"
+        ],
+        "week": "2026-04-27"
+      },
+      {
+        "date": "2026-05-03",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6279.28,
+        "leads": [
+          "Gabriel Silva Mane"
+        ],
+        "week": "2026-04-27"
+      },
+      {
+        "date": "2026-05-04",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 8300.94,
+        "leads": [
+          "Claudette St. Juste",
+          "Abubakarr Sessay"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-04",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6396.47,
+        "leads": [
+          "Bobbie Jackson III",
+          "Issa Camara"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-05",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 7652.39,
+        "leads": [
+          "Claudette St. Juste",
+          "Abubakarr Sessay"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-05",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6132.13,
+        "leads": [
+          "Christian Lawson"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-06",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 7356.35,
+        "leads": [
+          "Christian Lawson",
+          "Tecari Brown"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-06",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 5658.77,
+        "leads": [
+          "Claudette St. Juste",
+          "Abdou Diakhate"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-07",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 7721.96,
+        "leads": [
+          "Christian Lawson",
+          "Abdou Diakhate"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-07",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 5991.99,
+        "leads": [
+          "Bobbie Jackson III",
+          "Abdou Diakhate"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-08",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 8131.25,
+        "leads": [
+          "Gabriel Silva Mane",
+          "Maurice Smith"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-08",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6033.51,
+        "leads": [
+          "Christian Lawson",
+          "Bobbie Jackson III"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-09",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 8219.44,
+        "leads": [
+          "Maurice Smith",
+          "Gabriel Silva Mane"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-09",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6430.59,
+        "leads": [
+          "Christian Lawson",
+          "Bobbie Jackson III"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-10",
+        "flight": "104",
+        "route": "ATL-LHR",
+        "cost": 8233.1,
+        "leads": [
+          "Gabriel Silva Mane",
+          "Rachel Lester"
+        ],
+        "week": "2026-05-04"
+      },
+      {
+        "date": "2026-05-10",
+        "flight": "110",
+        "route": "ATL-MAN",
+        "cost": 6047.14,
+        "leads": [
+          "Claudette St. Juste",
+          "Maurice Smith"
+        ],
+        "week": "2026-05-04"
+      }
     ],
     "status": "active",
     "enabled": false
@@ -38,33 +245,366 @@
     "airline": "vs",
     "fileName": "ATL_Supplier_Invoice_TEST_May19-30_2026.xlsx",
     "uploadedAt": "2026-06-04T00:00:00.000Z",
-    "dateRange": {"start": "2026-05-19","end": "2026-05-30"},
-    "weeks": ["2026-05-18","2026-05-25"],
-    "flights": ["104","110"],
+    "dateRange": {
+      "start": "2026-05-19",
+      "end": "2026-05-30"
+    },
+    "weeks": [
+      "2026-05-18",
+      "2026-05-25"
+    ],
+    "flights": [
+      "104",
+      "110"
+    ],
     "totalCost": 135339.49,
     "rows": [
-      {"date":"2026-05-19","flight":"104","route":"LHR","cost":8010.49,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-19","flight":"110","route":"MAN","cost":5692.85,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-20","flight":"104","route":"LHR","cost":7540.8,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-20","flight":"110","route":"MAN","cost":5296.66,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-21","flight":"104","route":"LHR","cost":8440.53,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-21","flight":"110","route":"MAN","cost":6383.9,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-22","flight":"104","route":"LHR","cost":7768.82,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-22","flight":"110","route":"MAN","cost":5994.65,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-23","flight":"104","route":"LHR","cost":7164.43,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-23","flight":"110","route":"MAN","cost":5804.42,"leads":[],"week":"2026-05-18"},
-      {"date":"2026-05-26","flight":"104","route":"LHR","cost":6931.44,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-26","flight":"110","route":"MAN","cost":5642.75,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-27","flight":"104","route":"LHR","cost":7619.12,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-27","flight":"110","route":"MAN","cost":5447.31,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-28","flight":"104","route":"LHR","cost":8016.69,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-28","flight":"110","route":"MAN","cost":5737.67,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-29","flight":"104","route":"LHR","cost":7845.17,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-29","flight":"110","route":"MAN","cost":6257.98,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-30","flight":"104","route":"LHR","cost":7898.31,"leads":[],"week":"2026-05-25"},
-      {"date":"2026-05-30","flight":"110","route":"MAN","cost":5845.5,"leads":[],"week":"2026-05-25"}
+      {
+        "date": "2026-05-19",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8010.49,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-19",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5692.85,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-20",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7540.8,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-20",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5296.66,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-21",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8440.53,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-21",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6383.9,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-22",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7768.82,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-22",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5994.65,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-23",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7164.43,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-23",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5804.42,
+        "leads": [],
+        "week": "2026-05-18"
+      },
+      {
+        "date": "2026-05-26",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 6931.44,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-26",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5642.75,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-27",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7619.12,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-27",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5447.31,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-28",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8016.69,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-28",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5737.67,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-29",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7845.17,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-29",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6257.98,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-30",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7898.31,
+        "leads": [],
+        "week": "2026-05-25"
+      },
+      {
+        "date": "2026-05-30",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5845.5,
+        "leads": [],
+        "week": "2026-05-25"
+      }
     ],
     "status": "active",
     "enabled": false
+  },
+  {
+    "id": "lib_1780597558119_tsylr",
+    "airline": "vs",
+    "fileName": "ATL_Supplier_Invoice_TEST2_Jun02-13_2026.xlsx",
+    "uploadedAt": "2026-06-04T18:25:58.119Z",
+    "dateRange": {
+      "start": "2026-06-02",
+      "end": "2026-06-13"
+    },
+    "weeks": [
+      "2026-06-01",
+      "2026-06-08"
+    ],
+    "flights": [
+      "104",
+      "110"
+    ],
+    "totalCost": 135737.87,
+    "rows": [
+      {
+        "date": "2026-06-02",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8428.89,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-02",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5841.78,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-03",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7169.12,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-03",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5290.01,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-04",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7858.2,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-04",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6139.5,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-05",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7779.58,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-05",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6086.79,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-06",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7746.56,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-06",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5941.08,
+        "leads": [],
+        "week": "2026-06-01"
+      },
+      {
+        "date": "2026-06-09",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7083.7,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-09",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5412.02,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-10",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7542.98,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-10",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5865.71,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-11",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7949.93,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-11",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 6070.52,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-12",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 8040.14,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-12",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5904.52,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-13",
+        "flight": "104",
+        "route": "LHR",
+        "cost": 7995.08,
+        "leads": [],
+        "week": "2026-06-08"
+      },
+      {
+        "date": "2026-06-13",
+        "flight": "110",
+        "route": "MAN",
+        "cost": 5591.76,
+        "leads": [],
+        "week": "2026-06-08"
+      }
+    ],
+    "status": "active",
+    "enabled": true,
+    "_rawCount": 1882
   }
 ]
